@@ -249,10 +249,7 @@
                 <button type="button" class="btn-fullscreen" onclick="toggleFullScreen()">⛶ Pantalla Completa</button>
                 <button type="button" class="btn-reset" onclick="resetReport()">🔄 Generar Otro</button>
                 <button type="button" class="btn-print" onclick="printReport()">🖨️ Imprimir PDF</button>
-                <form id="download-form" action="/download" method="POST" style="display: inline;">
-                    <input type="hidden" name="html_content" id="html-content-input">
-                    <button type="submit" class="btn-download">⬇️ Descargar HTML</button>
-                </form>
+                <button type="button" class="btn-download" onclick="downloadHTML()">⬇️ Descargar HTML</button>
             </div>
         </div>
         
@@ -374,6 +371,23 @@
             } else if (elem.msRequestFullscreen) { /* IE11 */
                 elem.msRequestFullscreen();
             }
+        }
+
+        function downloadHTML() {
+            const html = htmlContentInput.value;
+            if (!html) {
+                alert('No hay contenido para descargar');
+                return;
+            }
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'reporte_profesional.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         function resetReport() {

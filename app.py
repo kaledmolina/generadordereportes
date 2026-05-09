@@ -5,7 +5,7 @@ import os
 from generar_reporte_automatico import generate_report_from_df
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64MB limit
 
 @app.route('/')
 def index():

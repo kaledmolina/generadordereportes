@@ -87,10 +87,21 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     
     for rid in top_reincident_ids:
         client_visits = df[df[id_col] == rid].sort_values('Fecha Creación')
-        client_name = str(client_visits.iloc[0]['Cliente'])[:30] if 'Cliente' in df.columns else rid
+        client_name = str(client_visits.iloc[0]['Cliente'])[:25] if 'Cliente' in df.columns else rid
         
         # Primera visita (referencia)
-        reincidencia_history_body += format_html_table_row([f"ID: {rid}", f"<strong>{client_name}</strong>", client_visits.iloc[0]['Fecha Creación'].strftime('%d/%m/%Y'), "---", client_visits.iloc[0]['Técnico Principal']])
+        v0 = client_visits.iloc[0]
+        solicitud0 = str(v0['Solicitud Suscriptor'])[:30] if 'Solicitud Suscriptor' in df.columns else '---'
+        solucion0 = str(v0['Solución Técnico'])[:30] if 'Solución Técnico' in df.columns else '---'
+        
+        reincidencia_history_body += format_html_table_row([
+            f"ID: {rid}", 
+            f"<strong>{client_name}</strong>", 
+            v0['Fecha Creación'].strftime('%d/%m/%Y'), 
+            "Iniciador", 
+            f"<strong>Rep:</strong> {solicitud0}<br><strong>Sol:</strong> {solucion0}",
+            v0['Técnico Principal']
+        ])
         
         # Visitas siguientes con intervalos
         for j in range(1, len(client_visits)):
@@ -101,10 +112,19 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
             badge_class = "badge-danger" if diff < 15 else "badge-warning"
             interval_badge = f'<span class="badge {badge_class}">{diff} días</span>'
             
-            reincidencia_history_body += format_html_table_row(["", "", v_curr['Fecha Creación'].strftime('%d/%m/%Y'), interval_badge, v_curr['Técnico Principal']])
+            solicitud = str(v_curr['Solicitud Suscriptor'])[:30] if 'Solicitud Suscriptor' in df.columns else '---'
+            solucion = str(v_curr['Solución Técnico'])[:30] if 'Solución Técnico' in df.columns else '---'
+            
+            reincidencia_history_body += format_html_table_row([
+                "", "", 
+                v_curr['Fecha Creación'].strftime('%d/%m/%Y'), 
+                interval_badge, 
+                f"<strong>Rep:</strong> {solicitud}<br><strong>Sol:</strong> {solucion}",
+                v_curr['Técnico Principal']
+            ])
     
     if len(reincident_ids) == 0:
-        reincidencia_history_body = '<tr><td colspan="5" class="text-center">No se detectaron casos de reincidencia en este periodo.</td></tr>'
+        reincidencia_history_body = '<tr><td colspan="6" class="text-center">No se detectaron casos de reincidencia en este periodo.</td></tr>'
     
     # 3. Promedio de Órdenes Diarias por Técnico
     df['Fecha_Dia'] = df['Fecha Creación'].dt.date

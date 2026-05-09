@@ -125,6 +125,12 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     trend_df['Ejecutadas'] = trend_executed
     trend_df = trend_df.fillna(0)
     
+    # Filtrar para que el gráfico solo muestre el rango del mes del reporte
+    # (Evita fechas inconsistentes de meses anteriores o posteriores)
+    min_date = df['Fecha Creación'].min().date()
+    max_date = df['Fecha Creación'].max().date()
+    trend_df = trend_df[(trend_df.index >= min_date) & (trend_df.index <= max_date)]
+    
     # --- ESTADÍSTICAS ---
     ordenes_cerradas = len(df[df['Estado'].str.lower() == 'cerrada'])
     ordenes_ejecutadas = len(df[df['Estado'].str.lower() == 'ejecutada'])

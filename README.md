@@ -52,6 +52,23 @@ python generar_reporte_automatico.py
 Una vez que el script termine (verás el mensaje "Reporte generado con exactitud"), abre la carpeta `reporte_final/` y visualiza el archivo:
 *   `reporte_generado.html`: Puedes abrirlo con cualquier navegador (Chrome, Edge, Safari).
 
+---
+
+## 🌐 Guía de Visualización en Navegador
+
+El reporte está optimizado para una experiencia interactiva y profesional:
+
+1.  **Navegación**: El reporte está dividido en páginas lógicas (Dashboard, Tiempos, Técnicos, Reincidencia). Puedes desplazarte hacia abajo para ver todas las secciones.
+2.  **Vista Móvil**: El "Resumen Ejecutivo" (primera página) está diseñado específicamente para ser consultado desde un celular. Es ideal para tomar una captura de pantalla y enviarla por WhatsApp para una actualización rápida.
+3.  **Exportar a PDF**:
+    *   Presiona `Ctrl + P` (Windows) o `Cmd + P` (Mac).
+    *   Selecciona **"Guardar como PDF"** como destino.
+    *   **IMPORTANTE**: En la configuración de impresión, asegúrate de activar la opción **"Gráficos de fondo"** (Background Graphics) para que los colores y degradados se vean correctamente.
+    *   El reporte está pre-configurado para ajustarse perfectamente al tamaño **A4**.
+4.  **Interactividad**: Los gráficos son de alta resolución y se adaptan al ancho de tu pantalla para una visualización clara de las etiquetas de datos.
+
+---
+
 ### 3. Compartir
 El reporte está diseñado para ser **auto-contenido**. Todas las imágenes y gráficos están embebidos directamente en el archivo HTML, lo que significa que puedes enviarlo por correo o WhatsApp y se verá perfectamente sin necesidad de archivos adicionales.
 

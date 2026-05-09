@@ -243,6 +243,18 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     charts['productividad_tecnicos.png'] = fig_to_base64(fig)
     plt.close()
 
+    # 10. tendencia_reincidencia.png
+    fig, ax = plt.subplots(figsize=(12, 5))
+    reincidencia_trend = reincidencias_df.groupby(reincidencias_df['Fecha Creación'].dt.date).size()
+    reincidencia_trend = reincidencia_trend.reindex(all_days, fill_value=0)
+    ax.plot(reincidencia_trend.index, reincidencia_trend.values, marker='o', linestyle='-', color=COLORS_DICT['accent1'], linewidth=2)
+    ax.fill_between(reincidencia_trend.index, reincidencia_trend.values, alpha=0.1, color=COLORS_DICT['accent1'])
+    ax.set_title('Monitoreo Diario de Casos de Reincidencia', fontsize=14, fontweight='bold')
+    ax.grid(True, linestyle='--', alpha=0.5)
+    plt.xticks(rotation=45)
+    charts['tendencia_reincidencia.png'] = fig_to_base64(fig)
+    plt.close()
+
     # --- CONSTRUCCIÓN DE TABLAS ---
     # KPI
     kpi_body = ""

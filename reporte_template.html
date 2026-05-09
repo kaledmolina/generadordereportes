@@ -703,7 +703,63 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 6 de 12</div>
+            <div>Página 6 de 13</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 6: ÍNDICE DE REINCIDENCIA -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Calidad de Servicio: Índice de Reincidencia</h1>
+        
+        <div class="callout highlight">
+            <strong>¿Qué es el Índice de Reincidencia?</strong><br>
+            Esta métrica identifica si un mismo suscriptor ha requerido más de una orden de servicio en un periodo menor a <strong>15 días</strong>. Es un indicador clave de la efectividad de la primera visita (First Time Fix). Un índice bajo indica alta calidad técnica y soluciones duraderas.
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box blue">
+                <div class="stat-value">{{ REINCIDENCIAS_COUNT }}</div>
+                <div class="stat-label">Casos Detectados</div>
+            </div>
+            <div class="stat-box orange">
+                <div class="stat-value">{{ TASA_REINCIDENCIA }}</div>
+                <div class="stat-label">Tasa de Reincidencia</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <img src="charts/tendencia_reincidencia.png" alt="Monitoreo Reincidencias">
+            <p class="caption">Figura 7: Monitoreo Temporal de Casos de Reincidencia durante el Mes</p>
+        </div>
+
+        <h2>Detalle de Casos de Reincidencia (Top 20)</h2>
+        <p>A continuación se listan los casos donde se detectó una nueva orden en menos de 15 días para el mismo código de cliente:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Código</th>
+                    <th style="width: 35%;">Cliente</th>
+                    <th style="width: 15%;">Fecha Orden</th>
+                    <th style="width: 15%;">Intervalo</th>
+                    <th style="width: 20%;">Técnico</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_REINCIDENCIA_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 3: Casos de Reincidencia Detectados (<15 días)</p>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 7 de 13</div>
         </div>
     </div>
 

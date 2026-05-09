@@ -72,12 +72,28 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     ordenes_backlog = len(df[~df['Estado'].str.lower().isin(['cerrada', 'ejecutada'])])
     
     # 2. Índice de Reincidencia (Garantías)
-    # Identificar si un mismo código tuvo más de una orden en menos de 15 días
     id_col = 'Código' if 'Código' in df.columns else ('Cliente' if 'Cliente' in df.columns else 'Dirección')
     df_reincidencia = df.sort_values([id_col, 'Fecha Creación'])
     df_reincidencia['Diff'] = df_reincidencia.groupby(id_col)['Fecha Creación'].diff().dt.days
-    reincidencias = len(df_reincidencia[df_reincidencia['Diff'] < 15])
+    reincidencias_df = df_reincidencia[df_reincidencia['Diff'] < 15].copy()
+    reincidencias = len(reincidencias_df)
     tasa_reincidencia = (reincidencias / TOTAL_ORDENES * 100) if TOTAL_ORDENES > 0 else 0
+    
+    # Tabla de detalles de reincidencia
+    reincidencia_body = ""
+    for i, row in reincidencias_df.head(20).iterrows():
+        cliente_nombre = str(row['Cliente'])[:30] if 'Cliente' in df.columns else 'N/A'
+        reincidencia_body += format_html_table_row([
+            row[id_col],
+            cliente_nombre,
+            row['Fecha Creación'].strftime('%d/%m/%Y'),
+            f"{int(row['Diff'])} días",
+            row['Técnico Principal']
+        ])
+    if reincidencias > 20:
+        reincidencia_body += format_html_table_row(["...", "...", "...", "...", "..."], is_total=True)
+    elif reincidencias == 0:
+        reincidencia_body = '<tr><td colspan="5" class="text-center">No se detectaron casos de reincidencia en este periodo.</td></tr>'
     
     # 3. Promedio de Órdenes Diarias por Técnico
     df['Fecha_Dia'] = df['Fecha Creación'].dt.date
@@ -374,6 +390,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ PENDIENTES_COUNT }}': str(ordenes_pendientes),
         '{{ TASA_REINCIDENCIA }}': f"{tasa_reincidencia:.2f}%",
         '{{ REINCIDENCIAS_COUNT }}': str(reincidencias),
+        '{{ TABLA_REINCIDENCIA_BODY }}': reincidencia_body,
         '{{ LISTA_RECOMENDACIONES }}': '<li>Reducir el backlog de órdenes pendientes.</li><li>Investigar casos de reincidencia para mejora de procesos.</li>',
         '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}%.",
         '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina"

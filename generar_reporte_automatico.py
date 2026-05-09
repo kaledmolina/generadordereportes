@@ -68,8 +68,8 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     
     # 1. Órdenes Pendientes
     ordenes_pendientes = len(df[df['Estado'].str.lower() == 'pendiente'])
-    # Órdenes no cerradas (Backlog general)
-    ordenes_no_cerradas = len(df[df['Estado'].str.lower() != 'cerrada'])
+    # Órdenes no cerradas ni ejecutadas (Backlog general)
+    ordenes_backlog = len(df[~df['Estado'].str.lower().isin(['cerrada', 'ejecutada'])])
     
     # 2. Índice de Reincidencia (Garantías)
     # Identificar si un mismo código tuvo más de una orden en menos de 15 días
@@ -101,8 +101,11 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     # --- ESTADÍSTICAS ---
     ordenes_cerradas = len(df[df['Estado'].str.lower() == 'cerrada'])
     tasa_cierre = (ordenes_cerradas / TOTAL_ORDENES * 100)
-    ordenes_con_solucion = len(df[df['Solución Técnico'] != 'SIN SOLUCIÓN'])
+    
+    # Órdenes con solución (Ejecutadas o Cerradas)
+    ordenes_con_solucion = len(df[df['Estado'].str.lower().isin(['cerrada', 'ejecutada'])])
     tasa_resolucion = (ordenes_con_solucion / TOTAL_ORDENES * 100)
+    
     ordenes_sin_solucion = TOTAL_ORDENES - ordenes_con_solucion
     barrios_unicos = df['Barrio'].nunique()
     
@@ -228,13 +231,13 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     # KPI
     kpi_body = ""
     kpi_body += format_html_table_row(["Tasa de Cierre", f"<strong>{tasa_cierre:.2f}%</strong>", f"{ordenes_cerradas} de {TOTAL_ORDENES} órdenes cerradas exitosamente"], aligns=["", "text-center", "text-left"])
-    kpi_body += format_html_table_row(["Tasa de Resolución", f"<strong>{tasa_resolucion:.2f}%</strong>", f"{ordenes_con_solucion} de {TOTAL_ORDENES} órdenes con solución aplicada"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Tasa de Resolución", f"<strong>{tasa_resolucion:.2f}%</strong>", f"{ordenes_con_solucion} de {TOTAL_ORDENES} órdenes con solución aplicada (Cerradas/Ejecutadas)"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Órdenes sin Solución", f"<strong>{ordenes_sin_solucion}</strong>", f"{(ordenes_sin_solucion/TOTAL_ORDENES*100):.2f}% del total (requiere seguimiento)"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Barrios Atendidos", f"<strong>{barrios_unicos}</strong>", "Cobertura geográfica completa"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Tiempo Promedio", f"<strong>{tiempo_promedio:.2f} hrs</strong>", f"Mediana: {mediana_tiempo:.2f} horas"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Órdenes con Tiempo Válido", f"<strong>{ordenes_con_tiempo_valido}</strong>", f"{(ordenes_con_tiempo_valido/TOTAL_ORDENES*100):.2f}% del total"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Pendientes", f"<strong>{ordenes_pendientes}</strong>", f"Órdenes en estado 'Pendiente'"], aligns=["", "text-center", "text-left"])
-    kpi_body += format_html_table_row(["Backlog Total", f"<strong>{ordenes_no_cerradas}</strong>", f"Total de órdenes no cerradas"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Backlog Total", f"<strong>{ordenes_backlog}</strong>", f"Órdenes no cerradas ni ejecutadas"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Índice de Reincidencia", f"<strong>{tasa_reincidencia:.2f}%</strong>", f"{reincidencias} casos de reincidencia (<15 días)"], aligns=["", "text-center", "text-left"])
     
     # Barrios Top 20
@@ -367,7 +370,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ CANTIDAD_BARRIOS }}': str(barrios_unicos),
         '{{ HALLAZGOS_PRINCIPALES }}': hallazgos,
         '{{ HALLAZGO_ESTRELLA }}': hallazgo_principal,
-        '{{ BACKLOG_TOTAL }}': str(ordenes_no_cerradas),
+        '{{ BACKLOG_TOTAL }}': str(ordenes_backlog),
         '{{ PENDIENTES_COUNT }}': str(ordenes_pendientes),
         '{{ TASA_REINCIDENCIA }}': f"{tasa_reincidencia:.2f}%",
         '{{ REINCIDENCIAS_COUNT }}': str(reincidencias),

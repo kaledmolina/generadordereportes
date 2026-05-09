@@ -64,6 +64,40 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     df['Tiempo Atención (horas)'] = df['Tiempo Atención'].dt.total_seconds() / 3600
     df['Tiempo Atención Positivo'] = df['Tiempo Atención (horas)'].apply(lambda x: x if x > 0 else 0)
     
+    # --- MÉTRICAS ADICIONALES (SOLICITADAS) ---
+    
+    # 1. Órdenes Pendientes
+    ordenes_pendientes = len(df[df['Estado'].str.lower() == 'pendiente'])
+    # Órdenes no cerradas (Backlog general)
+    ordenes_no_cerradas = len(df[df['Estado'].str.lower() != 'cerrada'])
+    
+    # 2. Índice de Reincidencia (Garantías)
+    # Identificar si un mismo código tuvo más de una orden en menos de 15 días
+    id_col = 'Código' if 'Código' in df.columns else ('Cliente' if 'Cliente' in df.columns else 'Dirección')
+    df_reincidencia = df.sort_values([id_col, 'Fecha Creación'])
+    df_reincidencia['Diff'] = df_reincidencia.groupby(id_col)['Fecha Creación'].diff().dt.days
+    reincidencias = len(df_reincidencia[df_reincidencia['Diff'] < 15])
+    tasa_reincidencia = (reincidencias / TOTAL_ORDENES * 100) if TOTAL_ORDENES > 0 else 0
+    
+    # 3. Promedio de Órdenes Diarias por Técnico
+    df['Fecha_Dia'] = df['Fecha Creación'].dt.date
+    tech_active_days = df.groupby('Técnico Principal')['Fecha_Dia'].nunique()
+    tech_total_orders = df.groupby('Técnico Principal').size()
+    tech_avg_daily = (tech_total_orders / tech_active_days).fillna(0)
+    
+    # 4. Tendencia Temporal
+    df['Fecha_Creacion_Dia'] = df['Fecha Creación'].dt.date
+    # Solo para cerradas, usamos la fecha de fin de atención para ver cuándo se cerró
+    df_cerradas = df[df['Estado'].str.lower() == 'cerrada'].copy()
+    trend_created = df.groupby('Fecha_Creacion_Dia').size()
+    trend_closed = df_cerradas.groupby(df_cerradas['Fecha Fin Atención'].dt.date).size()
+    
+    all_days = sorted(list(set(trend_created.index) | set(trend_closed.index)))
+    trend_df = pd.DataFrame(index=all_days)
+    trend_df['Creadas'] = trend_created
+    trend_df['Cerradas'] = trend_closed
+    trend_df = trend_df.fillna(0)
+    
     # --- ESTADÍSTICAS ---
     ordenes_cerradas = len(df[df['Estado'].str.lower() == 'cerrada'])
     tasa_cierre = (ordenes_cerradas / TOTAL_ORDENES * 100)
@@ -168,6 +202,28 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     charts['zona_bar.png'] = fig_to_base64(fig)
     plt.close()
 
+    # 8. tendencia_temporal.png
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(trend_df.index, trend_df['Creadas'], marker='o', label='Órdenes Creadas', color=COLORS_DICT['primary'], linewidth=2)
+    ax.plot(trend_df.index, trend_df['Cerradas'], marker='s', label='Órdenes Cerradas', color=COLORS_DICT['secondary'], linewidth=2)
+    ax.fill_between(trend_df.index, trend_df['Creadas'], alpha=0.1, color=COLORS_DICT['primary'])
+    ax.set_title('Tendencia Temporal: Creadas vs Cerradas', fontsize=14, fontweight='bold')
+    ax.legend()
+    ax.grid(True, linestyle='--', alpha=0.6)
+    plt.xticks(rotation=45)
+    charts['tendencia_temporal.png'] = fig_to_base64(fig)
+    plt.close()
+
+    # 9. productividad_tecnicos.png
+    fig, ax = plt.subplots(figsize=(12, 6))
+    prod_stats = tech_avg_daily[tech_avg_daily.index.isin(valid_techs)].sort_values(ascending=False)
+    bars = ax.bar(prod_stats.index, prod_stats.values, color=COLORS_DICT['accent3'])
+    ax.bar_label(bars, fmt='%.1f', padding=3)
+    ax.set_title('Promedio de Órdenes Diarias por Técnico (Días Activos)', fontsize=14, fontweight='bold')
+    plt.xticks(rotation=45, ha='right')
+    charts['productividad_tecnicos.png'] = fig_to_base64(fig)
+    plt.close()
+
     # --- CONSTRUCCIÓN DE TABLAS ---
     # KPI
     kpi_body = ""
@@ -177,6 +233,9 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     kpi_body += format_html_table_row(["Barrios Atendidos", f"<strong>{barrios_unicos}</strong>", "Cobertura geográfica completa"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Tiempo Promedio", f"<strong>{tiempo_promedio:.2f} hrs</strong>", f"Mediana: {mediana_tiempo:.2f} horas"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Órdenes con Tiempo Válido", f"<strong>{ordenes_con_tiempo_valido}</strong>", f"{(ordenes_con_tiempo_valido/TOTAL_ORDENES*100):.2f}% del total"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Pendientes", f"<strong>{ordenes_pendientes}</strong>", f"Órdenes en estado 'Pendiente'"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Backlog Total", f"<strong>{ordenes_no_cerradas}</strong>", f"Total de órdenes no cerradas"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Índice de Reincidencia", f"<strong>{tasa_reincidencia:.2f}%</strong>", f"{reincidencias} casos de reincidencia (<15 días)"], aligns=["", "text-center", "text-left"])
     
     # Barrios Top 20
     barrios_body = ""
@@ -190,8 +249,9 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     tech_stats = df.groupby('Técnico Principal').agg({'N° Orden': 'count', 'Tiempo Atención Positivo': 'mean'}).sort_values('N° Orden', ascending=False)
     for i, (name, row) in enumerate(tech_stats.iterrows(), 1):
         badge = f'<span class="badge badge-success">{i}°</span>' if i <= 2 else (f'<span class="badge badge-warning">{i}°</span>' if i <= 6 else "—")
-        tecnicos_body += format_html_table_row([f"<strong>{name}</strong>", int(row['N° Orden']), f"{(row['N° Orden']/TOTAL_ORDENES*100):.2f}%", f"{row['Tiempo Atención Positivo']:.2f}", badge])
-    tecnicos_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "100.00%", f"{tiempo_promedio:.2f}", "—"], is_total=True)
+        avg_daily = tech_avg_daily.get(name, 0)
+        tecnicos_body += format_html_table_row([f"<strong>{name}</strong>", int(row['N° Orden']), f"{avg_daily:.1f}", f"{row['Tiempo Atención Positivo']:.2f}", badge])
+    tecnicos_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "—", f"{tiempo_promedio:.2f}", "—"], is_total=True)
     
     # Soluciones
     sol_body = ""
@@ -255,12 +315,14 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     top_t_t = tech_stats.iloc[0]['Tiempo Atención Positivo']
     
     hallazgos = f"""
-        <strong>1. Volumen de Órdenes:</strong> Se atendieron <strong>{TOTAL_ORDENES} órdenes de servicio</strong> durante el período, con una tasa de cierre del <strong>{tasa_cierre:.2f}%</strong><br><br>
-        <strong>2. Tiempo de Atención:</strong> El tiempo promedio total de atención fue de <strong>{tiempo_promedio:.2f} horas</strong>. El {p_menos_48:.2f}% de las órdenes fueron atendidas en menos de 48 horas.<br><br>
-        <strong>3. Cobertura Geográfica:</strong> Se atendieron <strong>{barrios_unicos} barrios diferentes</strong>, con <strong>{top_b.index[0]}</strong> como el barrio con mayor volumen ({top_b.iloc[0]} órdenes, {(top_b.iloc[0]/TOTAL_ORDENES*100):.2f}%).<br><br>
-        <strong>4. Desempeño Técnico:</strong> <strong>{top_t}</strong> lidera con {top_t_o} órdenes ({top_t_p:.2f}%) y el menor tiempo promedio ({top_t_t:.2f} hrs).<br><br>
-        <strong>5. Soluciones:</strong> La solución más frecuente fue <strong>{top_s.index[0]}</strong> con {top_s.iloc[0]} casos ({(top_s.iloc[0]/TOTAL_ORDENES*100):.2f}%).
+        <strong>1. Volumen y Tendencia:</strong> Se atendieron <strong>{TOTAL_ORDENES} órdenes</strong> con una tasa de cierre del <strong>{tasa_cierre:.2f}%</strong>. El pico de demanda se observa en el gráfico de tendencia temporal.<br><br>
+        <strong>2. Calidad de Servicio:</strong> El índice de reincidencia es del <strong>{tasa_reincidencia:.2f}%</strong> ({reincidencias} casos), lo que indica una buena efectividad en la primera visita.<br><br>
+        <strong>3. Pendientes:</strong> Hay <strong>{ordenes_pendientes} órdenes pendientes</strong> en el sistema.<br><br>
+        <strong>4. Eficiencia Técnica:</strong> <strong>{top_t}</strong> destaca no solo por volumen sino por un promedio de <strong>{tech_avg_daily.get(top_t, 0):.1f} órdenes diarias</strong>.<br><br>
+        <strong>5. Tiempos:</strong> Promedio de <strong>{tiempo_promedio:.2f} horas</strong> por atención.
     """
+
+    hallazgo_principal = f"Se logró una tasa de resolución del {tasa_resolucion:.2f}% con {ordenes_pendientes} órdenes pendientes."
 
     # Extraer periodo dinámicamente
     meses = {1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril', 5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto', 9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'}
@@ -304,8 +366,13 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ PERIODO_SOLO_MES }}': solo_mes,
         '{{ CANTIDAD_BARRIOS }}': str(barrios_unicos),
         '{{ HALLAZGOS_PRINCIPALES }}': hallazgos,
-        '{{ LISTA_RECOMENDACIONES }}': '<li>Optimizar tiempos de respuesta.</li><li>Seguimiento de casos sin solución.</li>',
-        '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño con tasa de resolución del {tasa_resolucion:.2f}%.",
+        '{{ HALLAZGO_ESTRELLA }}': hallazgo_principal,
+        '{{ BACKLOG_TOTAL }}': str(ordenes_no_cerradas),
+        '{{ PENDIENTES_COUNT }}': str(ordenes_pendientes),
+        '{{ TASA_REINCIDENCIA }}': f"{tasa_reincidencia:.2f}%",
+        '{{ REINCIDENCIAS_COUNT }}': str(reincidencias),
+        '{{ LISTA_RECOMENDACIONES }}': '<li>Reducir el backlog de órdenes pendientes.</li><li>Investigar casos de reincidencia para mejora de procesos.</li>',
+        '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}%.",
         '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina"
     }
 

@@ -48,9 +48,21 @@ Simplemente ejecuta el script principal desde la raíz de la carpeta `package`:
 python generar_reporte_automatico.py
 ```
 
-### 2. Ver Resultados
-Una vez que el script termine (verás el mensaje "Reporte generado con exactitud"), abre la carpeta `reporte_final/` y visualiza el archivo:
-*   `reporte_generado.html`: Puedes abrirlo con cualquier navegador (Chrome, Edge, Safari).
+### 2. Ver Resultados (Opción Rápida)
+Abre la carpeta `reporte_final/` y visualiza el archivo `reporte_generado.html` directamente en tu navegador.
+
+### 3. Visualización mediante Servidor Local (Puerto 5000)
+Si prefieres visualizar el reporte a través de un servidor local (simulando un entorno web), puedes ejecutar:
+
+```bash
+# Desde la carpeta raíz del proyecto
+python -m http.server 5000
+```
+
+Luego, abre tu navegador e ingresa a la siguiente URL:
+👉 **[http://127.0.0.1:5000/reporte_final/reporte_generado.html](http://127.0.0.1:5000/reporte_final/reporte_generado.html)**
+
+---
 
 ---
 

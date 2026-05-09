@@ -114,15 +114,15 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     
     # 4. Tendencia Temporal
     df['Fecha_Creacion_Dia'] = df['Fecha Creación'].dt.date
-    # Solo para cerradas, usamos la fecha de fin de atención para ver cuándo se cerró
-    df_cerradas = df[df['Estado'].str.lower() == 'cerrada'].copy()
+    # Consideramos 'ejecutada' y 'cerrada' como trabajo terminado para la tendencia
+    df_terminadas = df[df['Estado'].str.lower().isin(['ejecutada', 'cerrada'])].copy()
     trend_created = df.groupby('Fecha_Creacion_Dia').size()
-    trend_closed = df_cerradas.groupby(df_cerradas['Fecha Fin Atención'].dt.date).size()
+    trend_executed = df_terminadas.groupby(df_terminadas['Fecha Fin Atención'].dt.date).size()
     
-    all_days = sorted(list(set(trend_created.index) | set(trend_closed.index)))
+    all_days = sorted(list(set(trend_created.index) | set(trend_executed.index)))
     trend_df = pd.DataFrame(index=all_days)
     trend_df['Creadas'] = trend_created
-    trend_df['Cerradas'] = trend_closed
+    trend_df['Ejecutadas'] = trend_executed
     trend_df = trend_df.fillna(0)
     
     # --- ESTADÍSTICAS ---
@@ -239,19 +239,19 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     # 8. tendencia_temporal.png
     fig, ax = plt.subplots(figsize=(14, 7))
     ax.plot(trend_df.index, trend_df['Creadas'], marker='o', label='Órdenes Creadas', color=COLORS_DICT['primary'], linewidth=2.5)
-    ax.plot(trend_df.index, trend_df['Cerradas'], marker='s', label='Órdenes Cerradas', color=COLORS_DICT['secondary'], linewidth=2.5)
+    ax.plot(trend_df.index, trend_df['Ejecutadas'], marker='s', label='Órdenes Ejecutadas', color=COLORS_DICT['secondary'], linewidth=2.5)
     
     # Agregar etiquetas de datos (Números sobre los puntos)
     for i, (x, y) in enumerate(zip(trend_df.index, trend_df['Creadas'])):
         if y > 0:
             ax.text(x, y + 0.5, f'{int(y)}', ha='center', va='bottom', fontsize=9, color=COLORS_DICT['primary'], fontweight='bold')
     
-    for i, (x, y) in enumerate(zip(trend_df.index, trend_df['Cerradas'])):
+    for i, (x, y) in enumerate(zip(trend_df.index, trend_df['Ejecutadas'])):
         if y > 0:
             ax.text(x, y - 1.5, f'{int(y)}', ha='center', va='top', fontsize=9, color=COLORS_DICT['secondary'], fontweight='bold')
 
     ax.fill_between(trend_df.index, trend_df['Creadas'], alpha=0.05, color=COLORS_DICT['primary'])
-    ax.set_title('Tendencia Temporal: Creadas vs Cerradas (Detalle Diario)', fontsize=14, fontweight='bold', pad=20)
+    ax.set_title('Tendencia Temporal: Creadas vs Ejecutadas (Detalle Diario)', fontsize=14, fontweight='bold', pad=20)
     ax.legend(loc='upper right')
     ax.grid(True, linestyle='--', alpha=0.3)
     

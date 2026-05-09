@@ -114,10 +114,10 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     
     # 4. Tendencia Temporal
     df['Fecha_Creacion_Dia'] = df['Fecha Creación'].dt.date
-    # Consideramos 'ejecutada' y 'cerrada' como trabajo terminado para la tendencia
-    df_terminadas = df[df['Estado'].str.lower().isin(['ejecutada', 'cerrada'])].copy()
+    # Basado en el campo 'Fecha Fin Atención', sin filtrar por el texto del estado
+    df_con_fecha = df[df['Fecha Fin Atención'].notna()].copy()
     trend_created = df.groupby('Fecha_Creacion_Dia').size()
-    trend_executed = df_terminadas.groupby(df_terminadas['Fecha Fin Atención'].dt.date).size()
+    trend_executed = df_con_fecha.groupby(df_con_fecha['Fecha Fin Atención'].dt.date).size()
     
     all_days = sorted(list(set(trend_created.index) | set(trend_executed.index)))
     trend_df = pd.DataFrame(index=all_days)

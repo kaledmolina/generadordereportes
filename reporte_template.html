@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ TITULO_PAGINA }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.6;
+            color: #1A1A2E;
+            background: #fff;
+        }
+
+        /* Page Layout */
+        .page {
+            width: 100%;
+            min-height: 297mm;
+            padding: 50px 60px;
+            page-break-after: always;
+            position: relative;
+            background: white;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        /* Header */
+        .page-header {
+            border-bottom: 2px solid #1C3557;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+        }
+
+        .page-header-title {
+            font-size: 9pt;
+            color: #666;
+        }
+
+        /* Titles */
+        h1 {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #1C3557;
+            margin-bottom: 12px;
+            border-bottom: 3px solid #1C3557;
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            color: #1C3557;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #1C3557;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        /* Text */
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+            color: #333;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 8.5pt;
+        }
+
+        thead {
+            background: #1C3557;
+            color: #fff;
+        }
+
+        th {
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8pt;
+        }
+
+        td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #E0E0E0;
+            font-size: 8pt;
+        }
+
+        tr:nth-child(even) {
+            background: #F5F7FA;
+        }
+
+        tr {
+            break-inside: avoid;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .total-row {
+            background: #1C3557 !important;
+            color: white;
+            font-weight: 700;
+        }
+
+        .total-row td {
+            border-bottom: none;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: #F0F5F8;
+            border: 1px solid #D0D8E0;
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px;
+        }
+
+        .stat-box.green {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-color: #81C784;
+        }
+
+        .stat-box.blue {
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            border-color: #64B5F6;
+        }
+
+        .stat-box.orange {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            border-color: #FFB74D;
+        }
+
+        .stat-value {
+            font-size: 22pt;
+            font-weight: 700;
+            color: #1C3557;
+        }
+
+        .stat-label {
+            font-size: 8pt;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        /* Callout Box */
+        .callout {
+            background: #F0F5F8;
+            border-left: 4px solid #1C3557;
+            padding: 12px 16px;
+            margin: 15px 0;
+            font-size: 9pt;
+            border-radius: 0 6px 6px 0;
+            break-inside: avoid;
+        }
+
+        .callout.highlight {
+            background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+            border-left-color: #3F51B5;
+        }
+
+        .callout.success {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-left-color: #4CAF50;
+        }
+
+        .callout.warning {
+            background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+            border-left-color: #FFC107;
+        }
+
+        /* Charts */
+        .chart-container {
+            margin: 20px 0;
+            text-align: center;
+            background: #FAFBFC;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #E0E0E0;
+            break-inside: avoid;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .charts-row {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .charts-row .chart-container {
+            flex: 1;
+        }
+
+        .charts-three {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .charts-three .chart-container {
+            flex: 1;
+        }
+
+        /* Caption */
+        .caption {
+            font-size: 8pt;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Highlight */
+        .highlight {
+            font-weight: 600;
+            color: #1C3557;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 7pt;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #C8E6C9;
+            color: #2E7D32;
+        }
+
+        .badge-warning {
+            background: #FFE0B2;
+            color: #E65100;
+        }
+
+        .badge-danger {
+            background: #FFCDD2;
+            color: #C62828;
+        }
+
+        .badge-info {
+            background: #BBDEFB;
+            color: #1565C0;
+        }
+
+        /* Page Footer */
+        .page-footer {
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            color: #888;
+            position: absolute;
+            bottom: 50px;
+            left: 60px;
+            right: 60px;
+        }
+
+        /* Spacer */
+        .spacer {
+            height: 20px;
+        }
+
+        /* Two Columns */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: linear-gradient(135deg, #1C3557 0%, #2A5298 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .summary-box h4 {
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-grid-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        /* Print styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+                /* Elimina márgenes del navegador */
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .page {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =============================================== -->
+    <!-- PAGE 1: RESUMEN EJECUTIVO -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Resumen Ejecutivo</h1>
+        <p>Este reporte presenta un análisis completo y detallado de las <span class="highlight">{{ TOTAL_ORDENES }}
+                órdenes de servicio</span> atendidas durante el período del <strong>{{ PERIODO_TEXTO }}</strong> por la
+            Corporación Regional de Telecomunicaciones.</p>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">{{ TOTAL_ORDENES }}</div>
+                <div class="stat-label">Total Órdenes</div>
+            </div>
+            <div class="stat-box green">
+                <div class="stat-value">{{ ORDENES_CERRADAS }}</div>
+                <div class="stat-label">Órdenes Cerradas</div>
+            </div>
+            <div class="stat-box orange">
+                <div class="stat-value">{{ TIEMPO_PROMEDIO_BREVE }}h</div>
+                <div class="stat-label">Tiempo Promedio</div>
+            </div>
+            <div class="stat-box blue">
+                <div class="stat-value">{{ TECNICOS_ACTIVOS }}</div>
+                <div class="stat-label">Técnicos Activos</div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 1 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 2: INDICADORES CLAVE -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Visualización General y KPIs</h1>
+        <div class="charts-row">
+            <div class="chart-container">
+                <img src="charts/clasificacion_pie.png" alt="Clasificación de Órdenes">
+                <p class="caption">Figura 1: Distribución por Clasificación</p>
+            </div>
+            <div class="chart-container">
+                <img src="charts/estado_bar.png" alt="Estado de Órdenes">
+                <p class="caption">Figura 2: Estado de las Órdenes</p>
+            </div>
+        </div>
+
+        <h2>Indicadores Clave de Rendimiento</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Indicador</th>
+                    <th class="text-center" style="width: 20%;">Valor</th>
+                    <th style="width: 50%;">Observación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_KPI_BODY }}
+            </tbody>
+        </table>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 2 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 2: ÓRDENES POR BARRIO -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Órdenes de Servicio por Barrio</h1>
+        <p>Distribución geográfica de las <span class="highlight">{{ TOTAL_ORDENES }} órdenes de servicio</span>
+            atendidas en el período. Los barrios con mayor concentración de solicitudes se presentan en orden
+            descendente.</p>
+
+        <div class="chart-container">
+            <img src="charts/barrios_bar.png" alt="Top Barrios">
+            <p class="caption">Figura 3: Top 15 Barrios con Mayor Volumen de Órdenes</p>
+        </div>
+
+        <h2>Top 20 Barrios por Volumen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">#</th>
+                    <th style="width: 50%;">Barrio</th>
+                    <th class="text-center" style="width: 20%;">Cantidad</th>
+                    <th class="text-center" style="width: 22%;">Porcentaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_BARRIOS_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 1: Top 20 Barrios por Volumen de Órdenes</p>
+
+        <div class="callout">
+            {{ NOTA_BARRIOS }}
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 3 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 3: REPORTE POR TÉCNICO -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Reporte Detallado por Técnico</h1>
+        <p>Desempeño individual de cada técnico mostrando el total de órdenes atendidas, tiempo promedio de atención y
+            participación porcentual en el período.</p>
+
+        <div class="chart-container">
+            <img src="charts/tecnicos_ranking.png" alt="Ranking de Técnicos">
+            <p class="caption">Figura 4: Ranking de Técnicos por Volumen de Órdenes</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Técnico</th>
+                    <th class="text-center" style="width: 15%;">Órdenes</th>
+                    <th class="text-center" style="width: 15%;">% Particip.</th>
+                    <th class="text-center" style="width: 20%;">Tiempo Prom. (hrs)</th>
+                    <th class="text-center" style="width: 15%;">Ranking</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_TECNICOS_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 2: Desempeño por Técnico</p>
+
+        <div class="callout highlight">
+            <strong>Análisis de Rendimiento:</strong><br>
+            {{ ANALISIS_RENDIMIENTO_TECNICO }}
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 4 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 4: ANÁLISIS POR SOLUCIÓN -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Tipos de Solución Aplicadas</h1>
+        <p>Clasificación detallada de las soluciones técnicas aplicadas por los técnicos. El total de soluciones
+            coincide con el total de órdenes: <strong>{{ TOTAL_ORDENES }}</strong>.</p>
+
+        <h2>Soluciones Más Frecuentes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">#</th>
+                    <th style="width: 55%;">Tipo de Solución</th>
+                    <th class="text-center" style="width: 17%;">Cantidad</th>
+                    <th class="text-center" style="width: 20%;">Porcentaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_SOLUCIONES_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 3: Soluciones Técnicas por Frecuencia</p>
+
+        <div class="callout success">
+            <strong>Conclusiones del Análisis de Soluciones:</strong><br>
+            {{ CONCLUSIONES_SOLUCIONES }}
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 5 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 5: CLASIFICACIÓN Y TIPO DE ORDEN -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Clasificación y Tipos de Orden</h1>
+        <p>Análisis de la distribución de órdenes según su clasificación y tipo de orden de servicio.</p>
+
+        <div class="two-columns">
+            <div>
+                <h2>Por Clasificación</h2>
+                <div class="chart-container">
+                    <img src="charts/clasificacion_pie.png" alt="Clasificación">
+                    <p class="caption">Figura 5: Distribución por Clasificación</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Clasificación</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-center">Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ TABLA_CLASIFICACION_BODY }}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h2>Por Tipo de Orden</h2>
+                <div class="chart-container">
+                    <img src="charts/tipo_orden_bar.png" alt="Tipo de Orden">
+                    <p class="caption">Figura 6: Distribución por Tipo de Orden</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo de Orden</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-center">Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ TABLA_TIPO_ORDEN_BODY }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 6 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 7: ESTADO DE LAS ÓRDENES -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Estado de las Órdenes</h1>
+        <p>Distribución detallada por el estado actual de las solicitudes procesadas en el sistema.</p>
+
+        <div class="chart-container">
+            <img src="charts/estado_bar.png" alt="Estado">
+            <p class="caption">Figura 7: Distribución por Estado</p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Estado</th>
+                    <th class="text-center" style="width: 25%;">Cantidad</th>
+                    <th class="text-center" style="width: 25%;">Porcentaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_ESTADO_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 4: Estado de las Órdenes</p>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 7 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 6: ANÁLISIS DE TIEMPOS -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Análisis de Tiempos de Atención</h1>
+        <p>Los tiempos de atención se calculan desde la <strong>Fecha de Creación</strong> hasta la <strong>Fecha Fin de
+                Atención</strong>. Se incluyen <strong>TODAS las {{ TOTAL_ORDENES }} órdenes</strong>.</p>
+
+        <h2>Estadísticas de Tiempo de Atención</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">{{ TOTAL_ORDENES }}</div>
+                <div class="stat-label">Total Órdenes</div>
+            </div>
+            <div class="stat-box green">
+                <div class="stat-value">{{ ORDENES_CON_TIEMPO_VALIDO }}</div>
+                <div class="stat-label">Con Tiempo Válido</div>
+            </div>
+            <div class="stat-box orange">
+                <div class="stat-value">{{ TIEMPO_PROMEDIO_HRS }}h</div>
+                <div class="stat-label">Tiempo Promedio</div>
+            </div>
+            <div class="stat-box blue">
+                <div class="stat-value">{{ MEDIANA_TIEMPO }}h</div>
+                <div class="stat-label">Mediana</div>
+            </div>
+        </div>
+
+        <h2>Distribución por Rangos de Tiempo</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rango de Tiempo</th>
+                    <th class="text-center">Cantidad</th>
+                    <th class="text-center">Porcentaje</th>
+                    <th class="text-center">Acumulado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_RANGOS_TIEMPO_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 5: Distribución de Tiempos de Atención (Total: {{ TOTAL_ORDENES }} órdenes)</p>
+
+        <div class="callout success">
+            <strong>Conclusión:</strong> El <strong>{{ PORCENTAJE_MENOS_48H }}%</strong> de las órdenes fueron atendidas
+            en menos de 48 horas desde su creación, lo cual representa un buen nivel de servicio al cliente. Solo el {{
+            PORCENTAJE_MAS_120H }}% requiere más de 5 días.
+        </div>
+
+        <h3>Métricas Adicionales</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Métrica</th>
+                    <th class="text-center">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_METRICAS_ADICIONALES_BODY }}
+            </tbody>
+        </table>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 8 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 7: GRÁFICOS ADICIONALES -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Visualizaciones de Desempeño</h1>
+
+        <div class="chart-container">
+            <img src="charts/solicitud_bar.png" alt="Tipos de Solicitud">
+            <p class="caption">Figura 8: Órdenes por Tipo de Solicitud del Suscriptor</p>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="chart-container">
+            <img src="charts/tecnicos_ranking.png" alt="Ranking Técnicos">
+            <p class="caption">Figura 9: Comparativa de Órdenes Atendidas por Técnico</p>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="charts-row">
+            <div class="chart-container">
+                <img src="charts/zona_bar.png" alt="Zonas">
+                <p class="caption">Figura 10: Distribución por Zona</p>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 9 de 10</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE 8: CONCLUSIONES -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Conclusiones y Recomendaciones</h1>
+
+        <h2>Resumen General</h2>
+        <div class="summary-box">
+            <h4>Resumen del Período</h4>
+            <div class="summary-grid-item">
+                <span>Total de órdenes procesadas:</span>
+                <span class="summary-value">{{ TOTAL_ORDENES }}</span>
+            </div>
+            <div class="summary-grid-item">
+                <span>Período analizado:</span>
+                <span class="summary-value">{{ PERIODO_SOLO_MES }}</span>
+            </div>
+            <div class="summary-grid-item">
+                <span>Barrios coberturados:</span>
+                <span class="summary-value">{{ CANTIDAD_BARRIOS }}</span>
+            </div>
+            <div class="summary-grid-item">
+                <span>Técnicos activos:</span>
+                <span class="summary-value">{{ TECNICOS_ACTIVOS }} principales</span>
+            </div>
+            <div class="summary-grid-item">
+                <span>Tasa de resolución:</span>
+                <span class="summary-value" style="color: #90EE90;">{{ TASA_RESOLUCION }}%</span>
+            </div>
+            <div class="summary-grid-item">
+                <span>Tiempo promedio atención:</span>
+                <span class="summary-value">{{ TIEMPO_PROMEDIO_HRS }} horas</span>
+            </div>
+        </div>
+
+        <h2>Hallazgos Principales</h2>
+        <div class="callout highlight">
+            {{ HALLAZGOS_PRINCIPALES }}
+        </div>
+
+        <h2>Recomendaciones</h2>
+        <ol style="margin-left: 20px; font-size: 9pt;">
+            {{ LISTA_RECOMENDACIONES }}
+        </ol>
+
+        <div class="spacer"></div>
+
+        <div class="callout success">
+            <strong>Clasificación General:</strong> {{ CLASIFICACION_GENERAL }}
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_EMPRESA }} - {{ PERIODO_SOLO_MES }}</div>
+            <div>Página 10 de 10</div>
+        </div>
+    </div>
+
+</body>
+
+</html>

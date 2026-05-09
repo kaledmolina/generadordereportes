@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Reportes Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1C3557;
+            --secondary: #00B4A6;
+            --accent: #E63946;
+            --bg: #F8FAFC;
+            --card: #FFFFFF;
+            --text: #1E293B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .main-card {
+            background: var(--card);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .upload-area {
+            border: 2px dashed #CBD5E1;
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #F1F5F9;
+        }
+
+        .upload-area:hover {
+            border-color: var(--secondary);
+            background: #F0FDFA;
+            transform: scale(1.01);
+        }
+
+        .upload-area.dragging {
+            border-color: var(--secondary);
+            background: #F0FDFA;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .btn-generate {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #2A5298 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(28, 53, 87, 0.2);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(28, 53, 87, 0.3);
+        }
+
+        .btn-generate:disabled {
+            background: #94A3B8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Preview Section */
+        #preview-section {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 50px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-header h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .btn-download, .btn-print, .btn-reset {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-download { background: var(--secondary); }
+        .btn-print { background: var(--primary); }
+        .btn-reset { background: #64748B; }
+
+        .btn-download:hover, .btn-print:hover, .btn-reset:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .print-tip {
+            background: #FFFBEB;
+            border: 1px solid #FEF3C7;
+            color: #92400E;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Hidden Form for Download */
+        #download-form { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Generador de Reportes Pro</h1>
+        <p>Carga tu archivo Excel y obtén un reporte profesional en segundos.</p>
+    </header>
+
+    <div class="main-card">
+        <form id="upload-form">
+            <div class="upload-area" id="drop-zone">
+                <div class="upload-icon">📊</div>
+                <h3 id="file-name">Arrastra tu Excel aquí o haz clic para buscar</h3>
+                <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 10px;">Formato soportado: .xlsx</p>
+                <input type="file" id="file-input" accept=".xlsx" style="display: none;">
+            </div>
+            
+            <button type="submit" class="btn-generate" id="generate-btn" disabled>
+                Generar Reporte Profesional
+            </button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #64748B;">Analizando datos y generando gráficos...</p>
+        </div>
+    </div>
+
+    <section id="preview-section">
+        <div class="preview-header">
+            <h2>Vista Previa del Reporte</h2>
+            <div class="button-group">
+                <button type="button" class="btn-reset" onclick="resetReport()">🔄 Generar Otro</button>
+                <button type="button" class="btn-print" onclick="printReport()">🖨️ Imprimir PDF</button>
+                <form id="download-form" action="/download" method="POST" style="display: inline;">
+                    <input type="hidden" name="html_content" id="html-content-input">
+                    <button type="submit" class="btn-download">⬇️ Descargar HTML</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="print-tip">
+            <span>💡</span>
+            <div>
+                <strong>Consejo para PDF:</strong> Para que el reporte quede perfecto, en la ventana de impresión selecciona 
+                <strong>Márgenes: "Ninguno"</strong> y desactiva <strong>"Encabezados y pies de página"</strong>.
+            </div>
+        </div>
+
+        <iframe id="preview-frame"></iframe>
+    </section>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const generateBtn = document.getElementById('generate-btn');
+        const uploadForm = document.getElementById('upload-form');
+        const loader = document.getElementById('loader');
+        const previewSection = document.getElementById('preview-section');
+        const previewFrame = document.getElementById('preview-frame');
+        const htmlContentInput = document.getElementById('html-content-input');
+
+        // Drag and drop logic
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragging');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragging');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragging');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.name.endsWith('.xlsx')) {
+                    fileName.innerText = `Archivo seleccionado: ${file.name}`;
+                    generateBtn.disabled = false;
+                } else {
+                    alert('Por favor selecciona un archivo .xlsx válido');
+                    fileInput.value = '';
+                    generateBtn.disabled = true;
+                }
+            }
+        }
+
+        // Form submission logic
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            // UI state
+            generateBtn.disabled = true;
+            loader.style.display = 'block';
+            previewSection.style.display = 'none';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const html = await response.text();
+                    
+                    // Show preview
+                    const blob = new Blob([html], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    previewFrame.src = url;
+                    
+                    // Prepare download
+                    htmlContentInput.value = html;
+                    
+                    previewSection.style.display = 'block';
+                    previewSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (err) {
+                alert('Ocurrió un error inesperado');
+                console.error(err);
+            } finally {
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        });
+
+        function printReport() {
+            const frame = document.getElementById('preview-frame');
+            frame.contentWindow.focus();
+            frame.contentWindow.print();
+        }
+
+        function resetReport() {
+            if (confirm('¿Deseas borrar el reporte actual y cargar otro archivo?')) {
+                fileInput.value = '';
+                fileName.innerText = 'Arrastra tu Excel aquí o haz clic para buscar';
+                generateBtn.disabled = true;
+                previewSection.style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

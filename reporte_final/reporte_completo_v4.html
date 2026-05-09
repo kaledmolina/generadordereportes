@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Completo de Órdenes de Servicio - Abril 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 16px;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        .header .date-range {
+            margin-top: 10px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #1e3c72;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 20px;
+            background: #2a5298;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .summary-card.green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .summary-card.orange {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .summary-card.blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .summary-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-card .label {
+            font-size: 11px;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 9px;
+        }
+
+        th {
+            background: #1e3c72;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:hover {
+            background: #e8f4f8;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Total Row */
+        .total-row {
+            background: #1e3c72 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            border-bottom: none;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        /* Stats Box */
+        .stats-box {
+            background: #f8f9fa;
+            border-left: 4px solid #2a5298;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .stats-box h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        /* Charts placeholder */
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        /* Two columns */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Page break */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                font-size: 9px;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+
+            .header {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            th {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Reporte Completo de Órdenes de Servicio</h1>
+            <h2>Corporación Regional de Telecomunicaciones</h2>
+            <div class="date-range">Periodo: 01 de Abril - 30 de Abril de 2026</div>
+        </div>
+
+        <!-- Resumen Ejecutivo -->
+        <div class="section">
+            <h3 class="section-title">Resumen Ejecutivo</h3>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="number">842</div>
+                    <div class="label">Total Órdenes</div>
+                </div>
+                <div class="summary-card green">
+                    <div class="number">819</div>
+                    <div class="label">Órdenes Cerradas</div>
+                </div>
+                <div class="summary-card orange">
+                    <div class="number">32.5h</div>
+                    <div class="label">Tiempo Promedio</div>
+                </div>
+                <div class="summary-card blue">
+                    <div class="number">6</div>
+                    <div class="label">Técnicos Activos</div>
+                </div>
+            </div>
+
+            <div class="stats-box">
+                <h4>Indicadores Clave de Rendimiento</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span>Tasa de Cierre:</span>
+                        <span class="stat-value">97.27% (819 de 842)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Órdenes sin Solución:</span>
+                        <span class="stat-value">7 (0.83%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tiempo Mínimo de Atención:</span>
+                        <span class="stat-value">0 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tiempo Máximo de Atención:</span>
+                        <span class="stat-value">811.48 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Mediana de Tiempo:</span>
+                        <span class="stat-value">22.58 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Órdenes con Tiempo Válido:</span>
+                        <span class="stat-value">820 (97.39%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Órdenes por Barrio -->
+        <div class="section">
+            <h3 class="section-title">Órdenes de Servicio por Barrio</h3>
+            <p style="margin-bottom: 15px; color: #666;">Distribución geográfica de las 842 órdenes de servicio atendidas en el periodo. Los barrios con mayor concentración de solicitudes se presentan en orden descendente.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 50%;">Barrio</th>
+                        <th class="text-center" style="width: 20%;">Cantidad</th>
+                        <th class="text-center" style="width: 25%;">Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>VILLA CIELO</td><td class="text-right">74</td><td class="text-center">8.79%</td></tr>
+                    <tr><td>2</td><td>VILLA JIMENEZ</td><td class="text-right">28</td><td class="text-center">3.33%</td></tr>
+                    <tr><td>3</td><td>MANDALA</td><td class="text-right">28</td><td class="text-center">3.33%</td></tr>
+                    <tr><td>4</td><td>LOS NOGALES</td><td class="text-right">28</td><td class="text-center">3.33%</td></tr>
+                    <tr><td>5</td><td>VILLA LOS ALPES</td><td class="text-right">26</td><td class="text-center">3.09%</td></tr>
+                    <tr><td>6</td><td>ALTOS DE CANAÁN</td><td class="text-right">26</td><td class="text-center">3.09%</td></tr>
+                    <tr><td>7</td><td>EL DORADO</td><td class="text-right">25</td><td class="text-center">2.97%</td></tr>
+                    <tr><td>8</td><td>FURATENA</td><td class="text-right">25</td><td class="text-center">2.97%</td></tr>
+                    <tr><td>9</td><td>C-CLARO LA UNION</td><td class="text-right">23</td><td class="text-center">2.73%</td></tr>
+                    <tr><td>10</td><td>EDMUNDO LOPEZ 4 ETAPA</td><td class="text-right">22</td><td class="text-center">2.61%</td></tr>
+                    <tr><td>11</td><td>C-CLARO ÑIPI C</td><td class="text-right">20</td><td class="text-center">2.38%</td></tr>
+                    <tr><td>12</td><td>VEREDA TROPICAL</td><td class="text-right">19</td><td class="text-center">2.26%</td></tr>
+                    <tr><td>13</td><td>VILLA MELISSA</td><td class="text-right">19</td><td class="text-center">2.26%</td></tr>
+                    <tr><td>14</td><td>LA PRADERA</td><td class="text-right">18</td><td class="text-center">2.14%</td></tr>
+                    <tr><td>15</td><td>C-CLARO LA ISLA</td><td class="text-right">16</td><td class="text-center">1.90%</td></tr>
+                    <tr><td>16</td><td>SIERRA CHIQUITA</td><td class="text-right">15</td><td class="text-center">1.78%</td></tr>
+                    <tr><td>17</td><td>LOS ARAUJOS</td><td class="text-right">15</td><td class="text-center">1.78%</td></tr>
+                    <tr><td>18</td><td>NUEVA ESPERANZA</td><td class="text-right">14</td><td class="text-center">1.66%</td></tr>
+                    <tr><td>19</td><td>C-CLARO LA REPRESA</td><td class="text-right">14</td><td class="text-center">1.66%</td></tr>
+                    <tr><td>20</td><td>POLICARPA</td><td class="text-right">13</td><td class="text-center">1.54%</td></tr>
+                    <tr class="total-row">
+                        <td colspan="2"><strong>TOTAL GENERAL</strong></td>
+                        <td class="text-right"><strong>842</strong></td>
+                        <td class="text-center"><strong>100.00%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin-top: 15px; font-size: 9px; color: #666;">
+                <strong>Nota:</strong> Se identificaron <strong>118 barrios diferentes</strong> en total. Los 20 barrios principales representan el 59.86% del total de órdenes (504 de 842).
+            </p>
+        </div>
+
+        <!-- Reporte por Técnico -->
+        <div class="section page-break">
+            <h3 class="section-title">Reporte Detallado por Técnico</h3>
+            <p style="margin-bottom: 15px; color: #666;">Desempeño individual de cada técnico incluyendo количество de órdenes atendidas, tiempo promedio de atención y participación porcentual.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Técnico</th>
+                        <th class="text-center" style="width: 15%;">Órdenes</th>
+                        <th class="text-center" style="width: 15%;">% Particip.</th>
+                        <th class="text-center" style="width: 20%;">Tiempo Prom. (hrs)</th>
+                        <th class="text-center" style="width: 15%;">Ranking</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Jorge Montes</strong></td>
+                        <td class="text-right">154</td>
+                        <td class="text-center">18.29%</td>
+                        <td class="text-center">23.93</td>
+                        <td class="text-center"><span class="badge badge-success">1°</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Juan Gabriel</strong></td>
+                        <td class="text-right">152</td>
+                        <td class="text-center">18.05%</td>
+                        <td class="text-center">35.78</td>
+                        <td class="text-center"><span class="badge badge-success">2°</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Daniel Ospina</strong></td>
+                        <td class="text-right">145</td>
+                        <td class="text-center">17.22%</td>
+                        <td class="text-center">27.14</td>
+                        <td class="text-center"><span class="badge badge-warning">3°</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Eulises Villadiego</strong></td>
+                        <td class="text-right">140</td>
+                        <td class="text-center">16.63%</td>
+                        <td class="text-center">31.84</td>
+                        <td class="text-center"><span class="badge badge-warning">4°</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>German Ferrer</strong></td>
+                        <td class="text-right">124</td>
+                        <td class="text-center">14.73%</td>
+                        <td class="text-center">38.98</td>
+                        <td class="text-center"><span class="badge badge-warning">5°</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Julian Villadiego</strong></td>
+                        <td class="text-right">115</td>
+                        <td class="text-center">13.66%</td>
+                        <td class="text-center">33.43</td>
+                        <td class="text-center"><span class="badge badge-warning">6°</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Soporte Noc</strong></td>
+                        <td class="text-right">6</td>
+                        <td class="text-center">0.71%</td>
+                        <td class="text-center">195.67</td>
+                        <td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Planta Externa</strong></td>
+                        <td class="text-right">4</td>
+                        <td class="text-center">0.48%</td>
+                        <td class="text-center">2.70</td>
+                        <td class="text-center">—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sin Asignar</strong></td>
+                        <td class="text-right">2</td>
+                        <td class="text-center">0.24%</td>
+                        <td class="text-center">0.00</td>
+                        <td class="text-center">—</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td><strong>TOTAL GENERAL</strong></td>
+                        <td class="text-right"><strong>842</strong></td>
+                        <td class="text-center"><strong>100.00%</strong></td>
+                        <td class="text-center"><strong>32.52</strong></td>
+                        <td class="text-center">—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="stats-box" style="margin-top: 20px;">
+                <h4>Análisis de Rendimiento</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span>Técnico con más órdenes:</span>
+                        <span class="stat-value">Jorge Montes (154)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Técnico más rápido:</span>
+                        <span class="stat-value">Jorge Montes (23.93 hrs)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Técnico con mayor tiempo promedio:</span>
+                        <span class="stat-value">Soporte NOC (195.67 hrs)*</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Promedio general del equipo:</span>
+                        <span class="stat-value">32.52 horas</span>
+                    </div>
+                </div>
+                <p style="margin-top: 10px; font-size: 8px; color: #666;">
+                    * El alto tiempo promedio de Soporte NOC se debe a órdenes especiales que requieren gestión a nivel de centro de operaciones.
+                </p>
+            </div>
+        </div>
+
+        <!-- Análisis por Solución -->
+        <div class="section">
+            <h3 class="section-title">Análisis por Tipo de Solución</h3>
+            <p style="margin-bottom: 15px; color: #666;">Clasificación de las soluciones aplicadas por los técnicos. El total de soluciones coincide con el total de órdenes: <strong>842</strong>.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 60%;">Tipo de Solución</th>
+                        <th class="text-center" style="width: 15%;">Cantidad</th>
+                        <th class="text-center" style="width: 20%;">Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>23 SERVICIO OPERATIVO</td><td class="text-right">143</td><td class="text-center">16.98%</td></tr>
+                    <tr><td>2</td><td>7 CAMBIO - EQUIPO DEFECTUOSO</td><td class="text-right">91</td><td class="text-center">10.81%</td></tr>
+                    <tr><td>3</td><td>4 CONFIGURACIÓN DE EQUIPO</td><td class="text-right">75</td><td class="text-center">8.91%</td></tr>
+                    <tr><td>4</td><td>6 FIBRA PARTIDA - CAMBIO FIBRA</td><td class="text-right">70</td><td class="text-center">8.31%</td></tr>
+                    <tr><td>5</td><td>19 MEJORA DE POTENCIA</td><td class="text-right">47</td><td class="text-center">5.58%</td></tr>
+                    <tr><td>6</td><td>24 CAMBIO DE BRIDGE</td><td class="text-right">42</td><td class="text-center">4.99%</td></tr>
+                    <tr><td>7</td><td>50 CAMBIO DE CONTRASEÑA</td><td class="text-right">36</td><td class="text-center">4.28%</td></tr>
+                    <tr><td>8</td><td>4 CONFIGURACIÓN + 7 CAMBIO EQUIPO</td><td class="text-right">29</td><td class="text-center">3.44%</td></tr>
+                    <tr><td>9</td><td>1 CAMBIO - CONECTOR MECÁNICO PARTIDO</td><td class="text-right">24</td><td class="text-center">2.85%</td></tr>
+                    <tr><td>10</td><td>51 CAJA SIN POTENCIA</td><td class="text-right">18</td><td class="text-center">2.14%</td></tr>
+                    <tr><td>11</td><td>5 FIBRA PARTIDA - SE INSTALA ROSETA</td><td class="text-right">17</td><td class="text-center">2.02%</td></tr>
+                    <tr><td>12</td><td>17 ESCANEO DE CANALES</td><td class="text-right">15</td><td class="text-center">1.78%</td></tr>
+                    <tr><td>13</td><td>7 CAMBIO EQUIPO + 24 CAMBIO BRIDGE</td><td class="text-right">14</td><td class="text-center">1.66%</td></tr>
+                    <tr><td>14</td><td>6 FIBRA + 11 CAMBIO CONECTOR CAJA</td><td class="text-right">13</td><td class="text-center">1.54%</td></tr>
+                    <tr><td>15</td><td>49 TRASLADO INTERNO</td><td class="text-right">9</td><td class="text-center">1.07%</td></tr>
+                    <tr><td>16</td><td>8 CAMBIO - EQUIPO QUEMADO</td><td class="text-right">9</td><td class="text-center">1.07%</td></tr>
+                    <tr><td>17</td><td>7 CAMBIO EQUIPO + 4 CONFIGURACIÓN</td><td class="text-right">8</td><td class="text-center">0.95%</td></tr>
+                    <tr><td>18</td><td><span class="highlight">SIN SOLUCIÓN</span></td><td class="text-right">7</td><td class="text-center">0.83%</td></tr>
+                    <tr><td>19</td><td>26 REUBICACION DE FIBRA</td><td class="text-right">6</td><td class="text-center">0.71%</td></tr>
+                    <tr><td>20</td><td>4 CONFIGURACIÓN + 17 ESCANEO CANALES</td><td class="text-right">6</td><td class="text-center">0.71%</td></tr>
+                    <tr class="total-row">
+                        <td colspan="2"><strong>TOTAL GENERAL</strong></td>
+                        <td class="text-right"><strong>842</strong></td>
+                        <td class="text-center"><strong>100.00%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="stats-box" style="margin-top: 15px;">
+                <h4>Conclusiones del Análisis de Soluciones</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span>Solución más frecuente:</span>
+                        <span class="stat-value">23 SERVICIO OPERATIVO (143 casos)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tasa de resolución:</span>
+                        <span class="stat-value">99.17% (835 de 842)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Órdenes sin solución:</span>
+                        <span class="stat-value">7 (0.83%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Problemas de fibra:</span>
+                        <span class="stat-value">106 (12.59%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Cambios de equipo:</span>
+                        <span class="stat-value">150 (17.81%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Configuraciones:</span>
+                        <span class="stat-value">118 (14.01%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clasificación y Tipo de Orden -->
+        <div class="section">
+            <div class="two-columns">
+                <div>
+                    <h3 class="section-title">Por Clasificación</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Clasificación</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Órdenes Rápidas</td><td class="text-right">447</td><td class="text-center">53.09%</td></tr>
+                            <tr><td>Cuadrilla</td><td class="text-right">395</td><td class="text-center">46.91%</td></tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL</strong></td>
+                                <td class="text-right"><strong>842</strong></td>
+                                <td class="text-center"><strong>100%</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3 class="section-title">Por Tipo de Orden</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo de Orden</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>025 REVISIÓN TÉCNICA</td><td class="text-right">772</td><td class="text-center">91.69%</td></tr>
+                            <tr><td>037 CAMBIO CONTRASEÑA</td><td class="text-right">49</td><td class="text-center">5.82%</td></tr>
+                            <tr><td>038 TRASLADO INTERNO</td><td class="text-right">21</td><td class="text-center">2.49%</td></tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL</strong></td>
+                                <td class="text-right"><strong>842</strong></td>
+                                <td class="text-center"><strong>100%</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado de Órdenes -->
+        <div class="section">
+            <h3 class="section-title">Estado de las Órdenes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Estado</th>
+                        <th class="text-center" style="width: 25%;">Cantidad</th>
+                        <th class="text-center" style="width: 25%;">Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-success">Cerrada</span></td>
+                        <td class="text-right">819</td>
+                        <td class="text-center">97.27%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-warning">Ejecutada</span></td>
+                        <td class="text-right">14</td>
+                        <td class="text-center">1.66%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-warning">Reprogramada</span></td>
+                        <td class="text-right">4</td>
+                        <td class="text-center">0.48%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-danger">Anulada</span></td>
+                        <td class="text-right">4</td>
+                        <td class="text-center">0.48%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-warning">Asignada</span></td>
+                        <td class="text-right">1</td>
+                        <td class="text-center">0.12%</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td><strong>TOTAL GENERAL</strong></td>
+                        <td class="text-right"><strong>842</strong></td>
+                        <td class="text-center"><strong>100.00%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tiempos de Atención -->
+        <div class="section page-break">
+            <h3 class="section-title">Análisis de Tiempos de Atención</h3>
+            <p style="margin-bottom: 15px; color: #666;">
+                Los tiempos de atención se calculan desde la <strong>Fecha de Creación</strong> hasta la <strong>Fecha Fin de Atención</strong>.
+                Se incluyen <strong>TODAS las 842 órdenes</strong>, incluyendo aquellas sin tiempo válido (Fecha Fin anterior o igual a Fecha Creación).
+            </p>
+
+            <div class="stats-box">
+                <h4>Estadísticas de Tiempo de Atención (en horas)</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span>Total de órdenes:</span>
+                        <span class="stat-value">842</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Órdenes con tiempo válido:</span>
+                        <span class="stat-value">829 (98.46%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Órdenes sin tiempo válido:</span>
+                        <span class="stat-value">13 (1.54%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tiempo promedio:</span>
+                        <span class="stat-value">32.52 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tiempo mínimo:</span>
+                        <span class="stat-value">0 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tiempo máximo:</span>
+                        <span class="stat-value">811.48 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Mediana (50%):</span>
+                        <span class="stat-value">22.58 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Percentil 25%:</span>
+                        <span class="stat-value">6.85 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Percentil 75%:</span>
+                        <span class="stat-value">43.74 horas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Desviación estándar:</span>
+                        <span class="stat-value">46.70 horas</span>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 10px 0; color: #1e3c72;">Distribución por Rangos de Tiempo</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rango de Tiempo</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-center">Porcentaje</th>
+                        <th class="text-center">Acumulado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Sin tiempo válido (Fecha Fin <= Creación)</td><td class="text-right">13</td><td class="text-center">1.54%</td><td class="text-center">13 (1.54%)</td></tr>
+                    <tr><td>0 - 6 horas (Mismo día)</td><td class="text-right">161</td><td class="text-center">19.12%</td><td class="text-center">174 (20.67%)</td></tr>
+                    <tr><td>6 - 12 horas (Día siguiente)</td><td class="text-right">68</td><td class="text-center">8.08%</td><td class="text-center">242 (28.74%)</td></tr>
+                    <tr><td>12 - 24 horas (1-2 días)</td><td class="text-right">224</td><td class="text-center">26.60%</td><td class="text-center">466 (55.34%)</td></tr>
+                    <tr><td>24 - 48 horas (2-3 días)</td><td class="text-right">196</td><td class="text-center">23.28%</td><td class="text-center">662 (78.62%)</td></tr>
+                    <tr><td>48 - 72 horas (3-4 días)</td><td class="text-right">93</td><td class="text-center">11.05%</td><td class="text-center">755 (89.67%)</td></tr>
+                    <tr><td>72 - 120 horas (4-5 días)</td><td class="text-right">49</td><td class="text-center">5.82%</td><td class="text-center">804 (95.49%)</td></tr>
+                    <tr><td>> 120 horas (más de 5 días)</td><td class="text-right">38</td><td class="text-center">4.51%</td><td class="text-center">842 (100.00%)</td></tr>
+                    <tr class="total-row">
+                        <td><strong>TOTAL GENERAL</strong></td>
+                        <td class="text-right"><strong>842</strong></td>
+                        <td class="text-center"><strong>100%</strong></td>
+                        <td class="text-center">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Resumen Final -->
+        <div class="section">
+            <div class="stats-box" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
+                <h4 style="color: white; border-bottom: 1px solid rgba(255,255,255,0.3);">Resumen General del Reporte</h4>
+                <div class="stats-grid" style="color: white;">
+                    <div class="stat-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <span>Total de órdenes procesadas:</span>
+                        <span class="stat-value" style="color: #ffd700;">842</span>
+                    </div>
+                    <div class="stat-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <span>Período analizado:</span>
+                        <span class="stat-value" style="color: #ffd700;">Abril 2026</span>
+                    </div>
+                    <div class="stat-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <span>Barrios coberturados:</span>
+                        <span class="stat-value" style="color: #ffd700;">118</span>
+                    </div>
+                    <div class="stat-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <span>Técnicos activos:</span>
+                        <span class="stat-value" style="color: #ffd700;">6 principales</span>
+                    </div>
+                    <div class="stat-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <span>Tasa de resolución:</span>
+                        <span class="stat-value" style="color: #38ef7d;">99.17%</span>
+                    </div>
+                    <div class="stat-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <span>Tiempo promedio atención:</span>
+                        <span class="stat-value" style="color: #ffd700;">32.52 horas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Reporte Generado:</strong> 8 de Mayo de 2026 | <strong>Fuente:</strong> Sistema de Gestión de Órdenes de Servicio</p>
+            <p>Corporación Regional de Telecomunicaciones - Departamento de Operaciones Técnicas</p>
+            <p style="margin-top: 10px; font-style: italic;">Documento confidencial para uso interno</p>
+        </div>
+    </div>
+</body>
+</html>

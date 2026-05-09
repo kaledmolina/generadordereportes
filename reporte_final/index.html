@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Órdenes de Servicio - Abril 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.6;
+            color: #1A1A2E;
+            background: #fff;
+        }
+        .page {
+            width: 100%;
+            min-height: 1123px;
+            padding: 60px;
+            page-break-after: always;
+        }
+        .page:last-child {
+            page-break-after: auto;
+        }
+        .page-header {
+            border-bottom: 2px solid #1C3557;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        .page-header-title {
+            font-size: 9pt;
+            color: #666;
+        }
+        h1 {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #1C3557;
+            margin-bottom: 8px;
+            border-bottom: 3px solid #1C3557;
+            padding-bottom: 8px;
+        }
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            color: #1C3557;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 9pt;
+        }
+        thead {
+            background: #1C3557;
+            color: #fff;
+        }
+        th {
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8pt;
+        }
+        td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #E0E0E0;
+            font-size: 8pt;
+        }
+        tr:nth-child(even) {
+            background: #F8F9FA;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .chart-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .page-footer {
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            color: #888;
+        }
+        .callout {
+            background: #F0F5F8;
+            border-left: 4px solid #1C3557;
+            padding: 12px 16px;
+            margin: 16px 0;
+            font-size: 9pt;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: #F0F5F8;
+            border: 1px solid #E0E0E0;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 20pt;
+            font-weight: 700;
+            color: #1C3557;
+        }
+        .stat-label {
+            font-size: 8pt;
+            color: #666;
+        }
+        .caption {
+            font-size: 8pt;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+        }
+        .charts-row {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .charts-row .chart-container {
+            flex: 1;
+        }
+        .highlight {
+            font-weight: 600;
+            color: #1C3557;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Page 1: Resumen -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Resumen Ejecutivo</h1>
+    <p>Este reporte presenta un análisis completo de las <span class="highlight">842 órdenes de servicio</span> atendidas durante el período del 1 al 30 de abril de 2026.</p>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value">842</div>
+            <div class="stat-label">Total Órdenes</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">97.27%</div>
+            <div class="stat-label">Tasa de Cierre</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Técnicos Activos</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">9</div>
+            <div class="stat-label">Zonas</div>
+        </div>
+    </div>
+
+    <div class="callout">
+        <strong>Hallazgo clave:</strong> El tiempo promedio total desde la creación hasta el fin de atención fue de <strong>31.39 horas</strong>. El 79.10% de las órdenes fueron atendidas en menos de 24 horas.
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-container">
+            <img src="charts/clasificacion_pie.png" alt="Clasificación de Órdenes">
+            <p class="caption">Figura 1: Distribución por Tipo de Solicitud</p>
+        </div>
+        <div class="chart-container">
+            <img src="charts/estado_bar.png" alt="Estado de Órdenes">
+            <p class="caption">Figura 2: Órdenes por Estado</p>
+        </div>
+    </div>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 1</div>
+    </div>
+</div>
+
+<!-- Page 2: Ranking de Técnicos -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Ranking de Técnicos con Clasificación</h1>
+    <p>Desempeño detallado de cada técnico mostrando el total de órdenes atendidas y su distribución por tipo de solicitud.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Ranking</th>
+                <th>Técnico</th>
+                <th>LUZ ROJA</th>
+                <th>SIN SERVICIO DE INTERNET</th>
+                <th>SERVICIO LENTO E INTERMITENTE</th>
+                <th>SIN SERVICIO DE TV</th>
+                <th>MEJORAMIENTO DE POTENCIA</th>
+                <th>CAMBIO DE EQUIPO</th>
+                <th>TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1°</strong></td>
+                <td><strong>Jorge Montes</strong></td>
+                <td>0</td>
+                <td>42</td>
+                <td>31</td>
+                <td>29</td>
+                <td>0</td>
+                <td>18</td>
+                <td><strong>154</strong></td>
+            </tr>
+            <tr>
+                <td><strong>2°</strong></td>
+                <td><strong>Juan Gabriel</strong></td>
+                <td>107</td>
+                <td>2</td>
+                <td>1</td>
+                <td>1</td>
+                <td>24</td>
+                <td>1</td>
+                <td><strong>152</strong></td>
+            </tr>
+            <tr>
+                <td><strong>3°</strong></td>
+                <td><strong>Daniel Ospina</strong></td>
+                <td>5</td>
+                <td>45</td>
+                <td>22</td>
+                <td>29</td>
+                <td>2</td>
+                <td>22</td>
+                <td><strong>145</strong></td>
+            </tr>
+            <tr>
+                <td><strong>4°</strong></td>
+                <td><strong>Eulises Villadiego</strong></td>
+                <td>0</td>
+                <td>39</td>
+                <td>30</td>
+                <td>28</td>
+                <td>0</td>
+                <td>21</td>
+                <td><strong>140</strong></td>
+            </tr>
+            <tr>
+                <td><strong>5°</strong></td>
+                <td><strong>German Ferrer</strong></td>
+                <td>80</td>
+                <td>11</td>
+                <td>6</td>
+                <td>2</td>
+                <td>15</td>
+                <td>1</td>
+                <td><strong>124</strong></td>
+            </tr>
+            <tr>
+                <td><strong>6°</strong></td>
+                <td><strong>Julian Villadiego</strong></td>
+                <td>69</td>
+                <td>5</td>
+                <td>4</td>
+                <td>0</td>
+                <td>23</td>
+                <td>0</td>
+                <td><strong>115</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 1: Ranking de Técnicos por Tipo de Solicitud (Principales)</p>
+
+    <div class="spacer" style="height: 20px;"></div>
+
+    <h2>Detalle Completo por Técnico</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Técnico</th>
+                <th>REVISION AUTOMONITOREO</th>
+                <th>CAMBIO DE CONTRASEÑA</th>
+                <th>REUBICACION DE EQUIPO</th>
+                <th>MANTENIMIENTO CORRECTIVO</th>
+                <th>GARANTIA INTERNET</th>
+                <th>CAMBIO DE CUENTA EN WIM</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Jorge Montes</strong></td>
+                <td>13</td>
+                <td>7</td>
+                <td>0</td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><strong>Juan Gabriel</strong></td>
+                <td>0</td>
+                <td>1</td>
+                <td>9</td>
+                <td>6</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><strong>Daniel Ospina</strong></td>
+                <td>1</td>
+                <td>8</td>
+                <td>0</td>
+                <td>1</td>
+                <td>1</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td><strong>Eulises Villadiego</strong></td>
+                <td>7</td>
+                <td>4</td>
+                <td>0</td>
+                <td>1</td>
+                <td>2</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><strong>German Ferrer</strong></td>
+                <td>0</td>
+                <td>0</td>
+                <td>6</td>
+                <td>3</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><strong>Julian Villadiego</strong></td>
+                <td>1</td>
+                <td>2</td>
+                <td>6</td>
+                <td>5</td>
+                <td>0</td>
+                <td>0</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 2: Clasificación Adicional por Técnico</p>
+
+    <div class="callout">
+        <strong>Observaciones:</strong><br>
+        • <strong>Juan Gabriel</strong> lidera en atención de casos LUZ ROJA con 107 órdenes<br>
+        • <strong>Jorge Montes</strong> tiene mayor volumen total (154) con foco en SIN SERVICIO DE INTERNET (42)<br>
+        • <strong>Julian Villadiego</strong> destaca en LUZ ROJA (69) y MEJORAMIENTO DE POTENCIA (23)
+    </div>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 2</div>
+    </div>
+</div>
+
+<!-- Page 3: Gráficos -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Gráficos de Desempeño</h1>
+
+    <div class="chart-container">
+        <img src="charts/tecnicos_ranking.png" alt="Ranking de Técnicos">
+        <p class="caption">Figura 3: Ranking de Técnicos por Tipo de Solicitud</p>
+    </div>
+
+    <div class="spacer" style="height: 30px;"></div>
+
+    <div class="chart-container">
+        <img src="charts/solicitud_bar.png" alt="Tipos de Solicitud">
+        <p class="caption">Figura 4: Órdenes por Tipo de Solicitud</p>
+    </div>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 3</div>
+    </div>
+</div>
+
+<!-- Page 4: Por Zona -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Órdenes por Zona</h1>
+
+    <div class="chart-container">
+        <img src="charts/zona_bar.png" alt="Órdenes por Zona">
+        <p class="caption">Figura 5: Distribución de Órdenes por Zona</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Zona</th>
+                <th>Cantidad</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>MONTERIA</td>
+                <td>400</td>
+                <td>47.51%</td>
+            </tr>
+            <tr>
+                <td>CANTACLARO</td>
+                <td>119</td>
+                <td>14.13%</td>
+            </tr>
+            <tr>
+                <td>MARGEN IZQUIERDA</td>
+                <td>83</td>
+                <td>9.86%</td>
+            </tr>
+            <tr>
+                <td>VILLACIELO</td>
+                <td>74</td>
+                <td>8.79%</td>
+            </tr>
+            <tr>
+                <td>DESARROLLISTA2 JF</td>
+                <td>45</td>
+                <td>5.34%</td>
+            </tr>
+            <tr>
+                <td>DESARROLLISTA1 JG</td>
+                <td>43</td>
+                <td>5.11%</td>
+            </tr>
+            <tr>
+                <td>DESARROLLISTA3 JJ</td>
+                <td>31</td>
+                <td>3.68%</td>
+            </tr>
+            <tr>
+                <td>MOCARI</td>
+                <td>24</td>
+                <td>2.85%</td>
+            </tr>
+            <tr>
+                <td>DESARROLLISTA4</td>
+                <td>23</td>
+                <td>2.73%</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 3: Distribución por Zona</p>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 4</div>
+    </div>
+</div>
+
+<!-- Page 5: Por Barrio -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Órdenes por Barrio</h1>
+    <p>Top 15 barrios con mayor volumen de órdenes de servicio.</p>
+
+    <div class="chart-container">
+        <img src="charts/barrios_bar.png" alt="Top Barrios">
+        <p class="caption">Figura 6: Top 15 Barrios con Mayor Volumen</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Barrio</th>
+                <th>Órdenes</th>
+                <th>Participación</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>VILLA CIELO</strong></td>
+                <td><strong>74</strong></td>
+                <td>8.79%</td>
+            </tr>
+            <tr>
+                <td>VILLA JIMENEZ</td>
+                <td>28</td>
+                <td>3.33%</td>
+            </tr>
+            <tr>
+                <td>MANDALA</td>
+                <td>28</td>
+                <td>3.33%</td>
+            </tr>
+            <tr>
+                <td>LOS NOGALES</td>
+                <td>28</td>
+                <td>3.33%</td>
+            </tr>
+            <tr>
+                <td>VILLA LOS ALPES</td>
+                <td>26</td>
+                <td>3.09%</td>
+            </tr>
+            <tr>
+                <td>ALTOS DE CANAÁN</td>
+                <td>26</td>
+                <td>3.09%</td>
+            </tr>
+            <tr>
+                <td>EL DORADO</td>
+                <td>25</td>
+                <td>2.97%</td>
+            </tr>
+            <tr>
+                <td>FURATENA</td>
+                <td>25</td>
+                <td>2.97%</td>
+            </tr>
+            <tr>
+                <td>C-CLARO LA UNION</td>
+                <td>23</td>
+                <td>2.73%</td>
+            </tr>
+            <tr>
+                <td>EDMUNDO LOPEZ 4 ETAPA</td>
+                <td>22</td>
+                <td>2.61%</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 4: Top 10 Barrios por Volumen</p>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 5</div>
+    </div>
+</div>
+
+<!-- Page 6: Soluciones Técnicas -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Soluciones y Novedades Técnicas</h1>
+
+    <h2>Soluciones Técnicas Más Frecuentes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Solución</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>23 SERVICIO OPERATIVO</td>
+                <td>143</td>
+            </tr>
+            <tr>
+                <td>7 CAMBIO - EQUIPO DEFECTUOSO</td>
+                <td>91</td>
+            </tr>
+            <tr>
+                <td>4 CONFIGURACIÓN DE EQUIPO</td>
+                <td>75</td>
+            </tr>
+            <tr>
+                <td>6 FIBRA PARTIDA - CAMBIO FIBRA</td>
+                <td>70</td>
+            </tr>
+            <tr>
+                <td>19 MEJORA DE POTENCIA</td>
+                <td>47</td>
+            </tr>
+            <tr>
+                <td>24 CAMBIO DE BRIDGE</td>
+                <td>42</td>
+            </tr>
+            <tr>
+                <td>50 CAMBIO DE CONTRASEÑA</td>
+                <td>36</td>
+            </tr>
+            <tr>
+                <td>1 CAMBIO - CONECTOR MECÁNICO PARTIDO</td>
+                <td>24</td>
+            </tr>
+            <tr>
+                <td>51 CAJA SIN POTENCIA</td>
+                <td>18</td>
+            </tr>
+            <tr>
+                <td>5 FIBRA PARTIDA - SE INSTALA ROSETA</td>
+                <td>17</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 5: Soluciones Técnicas por Frecuencia</p>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 6</div>
+    </div>
+</div>
+
+<!-- Page 7: Distribución de Tiempos -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Resumen de Tiempos de Atención</h1>
+    <p>Análisis detallado de los tiempos de atención desde la creación hasta el fin de la atención.</p>
+
+    <h2>Distribución de Tiempos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Rango de Tiempo (horas)</th>
+                <th>Cantidad Órdenes</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>0 - 4 horas</td>
+                <td>125</td>
+                <td>14.84%</td>
+            </tr>
+            <tr>
+                <td>4 - 8 horas</td>
+                <td>187</td>
+                <td>22.21%</td>
+            </tr>
+            <tr>
+                <td>8 - 12 horas</td>
+                <td>156</td>
+                <td>18.53%</td>
+            </tr>
+            <tr>
+                <td>12 - 24 horas</td>
+                <td>198</td>
+                <td>23.52%</td>
+            </tr>
+            <tr>
+                <td>24 - 48 horas</td>
+                <td>112</td>
+                <td>13.30%</td>
+            </tr>
+            <tr>
+                <td>48 - 72 horas</td>
+                <td>42</td>
+                <td>4.99%</td>
+            </tr>
+            <tr>
+                <td>Más de 72 horas</td>
+                <td>22</td>
+                <td>2.61%</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 6: Distribución de Tiempos de Atención</p>
+
+    <div class="callout">
+        <strong>Conclusión:</strong> El 79.10% de las órdenes fueron atendidas en menos de 24 horas desde su creación, lo cual representa un buen nivel de servicio.
+    </div>
+
+    <div class="spacer" style="height: 30px;"></div>
+
+    <h2>Indicadores de Desempeño</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Métrica</th>
+                <th>Promedio</th>
+                <th>Mediana</th>
+                <th>Mínimo</th>
+                <th>Máximo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Tiempo de Respuesta (horas)</td>
+                <td>30.75</td>
+                <td>21.98</td>
+                <td>0.02</td>
+                <td>724.85</td>
+            </tr>
+            <tr>
+                <td>Tiempo de Atención (horas)</td>
+                <td>0.67</td>
+                <td>0.58</td>
+                <td>0.02</td>
+                <td>8.92</td>
+            </tr>
+            <tr>
+                <td>Tiempo Total (horas)</td>
+                <td>31.39</td>
+                <td>22.74</td>
+                <td>0.50</td>
+                <td>725.50</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="caption">Tabla 7: Métricas de Tiempo de Atención</p>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 7</div>
+    </div>
+</div>
+
+<!-- Page 8: Conclusiones -->
+<div class="page">
+    <div class="page-header">
+        <div class="page-header-title">Reporte de Órdenes de Servicio — Abril 2026</div>
+    </div>
+
+    <h1>Conclusiones y Recomendaciones</h1>
+
+    <h2>Hallazgos Principales</h2>
+    <ul>
+        <li>Se atendieron <strong>842 órdenes de servicio</strong> durante el período, con una tasa de cierre del <strong>97.27%</strong></li>
+        <li>El tiempo promedio total de atención fue de <strong>31.39 horas</strong></li>
+        <li><strong>LUZ ROJA</strong> es el tipo de solicitud más frecuente con 269 órdenes (31.95%)</li>
+        <li><strong>SIN SERVICIO DE INTERNET</strong> representa 144 órdenes (17.10%)</li>
+        <li><strong>Juan Gabriel</strong> lidera en atención de casos LUZ ROJA (107)</li>
+        <li><strong>Villa Cielo</strong> es el barrio con mayor volumen (74 órdenes, 8.79%)</li>
+        <li>El <strong>79.10%</strong> de las órdenes fueron atendidas en menos de 24 horas</li>
+    </ul>
+
+    <div class="spacer" style="height: 20px;"></div>
+
+    <h2>Recomendaciones</h2>
+    <ol>
+        <li>Revisar los procesos de asignación para casos LUZ ROJA, priorizando técnicos con mejor desempeño en urgencias</li>
+        <li>Implementar monitoreo más eficiente para órdenes que superen las 48 horas</li>
+        <li>Considerar incrementar técnicos en zonas con alta demanda (Villa Cielo, Cantaclaro, Montería)</li>
+        <li>Evaluar la optimización de canales digitales dado el alto uso de WhatsApp (74.82%)</li>
+        <li>Establecer SLAs específicos para casos LUZ ROJA y SIN SERVICIO DE INTERNET</li>
+    </ol>
+
+    <div class="callout">
+        <strong>Resumen de Solicitudes:</strong><br>
+        • <span style="color: #E63946;">● LUZ ROJA</span>: 269 órdenes (31.95%)<br>
+        • <span style="color: #1C3557;">● SIN SERVICIO DE INTERNET</span>: 144 órdenes (17.10%)<br>
+        • <span style="color: #00B4A6;">● SERVICIO LENTO E INTERMITENTE</span>: 94 órdenes (11.17%)<br>
+        • <span style="color: #FF9F1C;">● SIN SERVICIO DE TV</span>: 92 órdenes (10.93%)<br>
+        • <span style="color: #2A9D8F;">● MEJORAMIENTO DE POTENCIA</span>: 64 órdenes (7.60%)<br>
+        • <span style="color: #8338EC;">● CAMBIO DE EQUIPO</span>: 63 órdenes (7.48%)
+    </div>
+
+    <div class="page-footer">
+        <div>Reporte de Órdenes de Servicio - Abril 2026</div>
+        <div>Página 8</div>
+    </div>
+</div>
+
+</body>
+</html>

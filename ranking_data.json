@@ -1,0 +1,89 @@
+[
+  {
+    "tecnico": "Jorge Montes",
+    "total": 154,
+    "detalle": {
+      "SIN SERVICIO DE INTERNET": 42,
+      "SERVICIO LENTO E INTERMITENTE": 31,
+      "SIN SERVICIO DE TV": 29,
+      "CAMBIO DE EQUIPO": 18,
+      "REVISION AUTOMONITOREO": 13,
+      "CAMBIO DE CONTRASEÑA": 7,
+      "MANTENIMIENTO CORRECTIVO": 3
+    }
+  },
+  {
+    "tecnico": "Juan Gabriel",
+    "total": 152,
+    "detalle": {
+      "LUZ ROJA": 107,
+      "MEJORAMIENTO DE POTENCIA": 24,
+      "REUBICACION DE EQUIPO": 9,
+      "MANTENIMIENTO CORRECTIVO": 6,
+      "SIN SERVICIO DE INTERNET": 2,
+      "SIN SERVICIO DE TV": 1,
+      "SERVICIO LENTO E INTERMITENTE": 1,
+      "CAMBIO DE EQUIPO": 1,
+      "CAMBIO DE CONTRASEÑA": 1
+    }
+  },
+  {
+    "tecnico": "Daniel Ospina",
+    "total": 145,
+    "detalle": {
+      "SIN SERVICIO DE INTERNET": 45,
+      "SIN SERVICIO DE TV": 29,
+      "CAMBIO DE EQUIPO": 22,
+      "SERVICIO LENTO E INTERMITENTE": 22,
+      "CAMBIO DE CONTRASEÑA": 8,
+      "LUZ ROJA": 5,
+      "MEJORAMIENTO DE POTENCIA": 2,
+      "MANTENIMIENTO CORRECTIVO": 1,
+      "CAMBIO DE CUENTA EN WIM": 1,
+      "REVISION AUTOMONITOREO": 1,
+      "GARANTIA INTERNET": 1
+    }
+  },
+  {
+    "tecnico": "Eulises Villadiego",
+    "total": 140,
+    "detalle": {
+      "SIN SERVICIO DE INTERNET": 39,
+      "SERVICIO LENTO E INTERMITENTE": 30,
+      "SIN SERVICIO DE TV": 28,
+      "CAMBIO DE EQUIPO": 21,
+      "REVISION AUTOMONITOREO": 7,
+      "CAMBIO DE CONTRASEÑA": 4,
+      "GARANTIA INTERNET": 2,
+      "MANTENIMIENTO CORRECTIVO": 1
+    }
+  },
+  {
+    "tecnico": "German Ferrer",
+    "total": 124,
+    "detalle": {
+      "LUZ ROJA": 80,
+      "MEJORAMIENTO DE POTENCIA": 15,
+      "SIN SERVICIO DE INTERNET": 11,
+      "SERVICIO LENTO E INTERMITENTE": 6,
+      "REUBICACION DE EQUIPO": 6,
+      "MANTENIMIENTO CORRECTIVO": 3,
+      "SIN SERVICIO DE TV": 2,
+      "CAMBIO DE EQUIPO": 1
+    }
+  },
+  {
+    "tecnico": "Julian Villadiego",
+    "total": 115,
+    "detalle": {
+      "LUZ ROJA": 69,
+      "MEJORAMIENTO DE POTENCIA": 23,
+      "REUBICACION DE EQUIPO": 6,
+      "SIN SERVICIO DE INTERNET": 5,
+      "MANTENIMIENTO CORRECTIVO": 5,
+      "SERVICIO LENTO E INTERMITENTE": 4,
+      "CAMBIO DE CONTRASEÑA": 2,
+      "REVISION AUTOMONITOREO": 1
+    }
+  }
+]

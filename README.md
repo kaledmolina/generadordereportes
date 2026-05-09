@@ -55,7 +55,7 @@ Abre la carpeta `reporte_final/` y visualiza el archivo `reporte_generado.html` 
 Si prefieres visualizar el reporte a través de un servidor local (simulando un entorno web), puedes ejecutar:
 
 ```bash
-# Desde la carpeta raíz del proyecto
+
 python -m http.server 5000
 ```
 

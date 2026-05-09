@@ -155,6 +155,7 @@
         .btn-download { background: var(--secondary); }
         .btn-print { background: var(--primary); }
         .btn-reset { background: #64748B; }
+        .btn-fullscreen { background: #6366F1; }
 
         .btn-download:hover, .btn-print:hover, .btn-reset:hover {
             filter: brightness(1.1);
@@ -245,6 +246,7 @@
         <div class="preview-header">
             <h2>Vista Previa del Reporte</h2>
             <div class="button-group">
+                <button type="button" class="btn-fullscreen" onclick="toggleFullScreen()">⛶ Pantalla Completa</button>
                 <button type="button" class="btn-reset" onclick="resetReport()">🔄 Generar Otro</button>
                 <button type="button" class="btn-print" onclick="printReport()">🖨️ Imprimir PDF</button>
                 <form id="download-form" action="/download" method="POST" style="display: inline;">
@@ -361,6 +363,17 @@
             const frame = document.getElementById('preview-frame');
             frame.contentWindow.focus();
             frame.contentWindow.print();
+        }
+
+        function toggleFullScreen() {
+            const elem = document.getElementById('preview-frame');
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
         }
 
         function resetReport() {

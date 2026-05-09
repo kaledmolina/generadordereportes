@@ -71,29 +71,40 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     # Órdenes no cerradas ni ejecutadas (Backlog general)
     ordenes_backlog = len(df[~df['Estado'].str.lower().isin(['cerrada', 'ejecutada'])])
     
-    # 2. Índice de Reincidencia (Garantías)
+    # 2. Índice de Reincidencia (Garantías) - 30 DÍAS
     id_col = 'Código' if 'Código' in df.columns else ('Cliente' if 'Cliente' in df.columns else 'Dirección')
     df_reincidencia = df.sort_values([id_col, 'Fecha Creación'])
     df_reincidencia['Diff'] = df_reincidencia.groupby(id_col)['Fecha Creación'].diff().dt.days
-    reincidencias_df = df_reincidencia[df_reincidencia['Diff'] < 15].copy()
+    reincidencias_df = df_reincidencia[df_reincidencia['Diff'] < 30].copy()
     reincidencias = len(reincidencias_df)
     tasa_reincidencia = (reincidencias / TOTAL_ORDENES * 100) if TOTAL_ORDENES > 0 else 0
     
-    # Tabla de detalles de reincidencia
-    reincidencia_body = ""
-    for i, row in reincidencias_df.head(20).iterrows():
-        cliente_nombre = str(row['Cliente'])[:30] if 'Cliente' in df.columns else 'N/A'
-        reincidencia_body += format_html_table_row([
-            row[id_col],
-            cliente_nombre,
-            row['Fecha Creación'].strftime('%d/%m/%Y'),
-            f"{int(row['Diff'])} días",
-            row['Técnico Principal']
-        ])
-    if reincidencias > 20:
-        reincidencia_body += format_html_table_row(["...", "...", "...", "...", "..."], is_total=True)
-    elif reincidencias == 0:
-        reincidencia_body = '<tr><td colspan="5" class="text-center">No se detectaron casos de reincidencia en este periodo.</td></tr>'
+    # Identificar clientes reincidentes para mostrar su historia completa
+    reincident_ids = reincidencias_df[id_col].unique()
+    reincidencia_history_body = ""
+    # Tomamos los top 15 clientes con más visitas reincidentes
+    top_reincident_ids = df[df[id_col].isin(reincident_ids)].groupby(id_col).size().sort_values(ascending=False).head(15).index
+    
+    for rid in top_reincident_ids:
+        client_visits = df[df[id_col] == rid].sort_values('Fecha Creación')
+        client_name = str(client_visits.iloc[0]['Cliente'])[:30] if 'Cliente' in df.columns else rid
+        
+        # Primera visita (referencia)
+        reincidencia_history_body += format_html_table_row([f"ID: {rid}", f"<strong>{client_name}</strong>", client_visits.iloc[0]['Fecha Creación'].strftime('%d/%m/%Y'), "---", client_visits.iloc[0]['Técnico Principal']])
+        
+        # Visitas siguientes con intervalos
+        for j in range(1, len(client_visits)):
+            v_curr = client_visits.iloc[j]
+            v_prev = client_visits.iloc[j-1]
+            diff = (v_curr['Fecha Creación'] - v_prev['Fecha Creación']).days
+            
+            badge_class = "badge-danger" if diff < 15 else "badge-warning"
+            interval_badge = f'<span class="badge {badge_class}">{diff} días</span>'
+            
+            reincidencia_history_body += format_html_table_row(["", "", v_curr['Fecha Creación'].strftime('%d/%m/%Y'), interval_badge, v_curr['Técnico Principal']])
+    
+    if len(reincident_ids) == 0:
+        reincidencia_history_body = '<tr><td colspan="5" class="text-center">No se detectaron casos de reincidencia en este periodo.</td></tr>'
     
     # 3. Promedio de Órdenes Diarias por Técnico
     df['Fecha_Dia'] = df['Fecha Creación'].dt.date
@@ -402,7 +413,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ PENDIENTES_COUNT }}': str(ordenes_pendientes),
         '{{ TASA_REINCIDENCIA }}': f"{tasa_reincidencia:.2f}%",
         '{{ REINCIDENCIAS_COUNT }}': str(reincidencias),
-        '{{ TABLA_REINCIDENCIA_BODY }}': reincidencia_body,
+        '{{ TABLA_REINCIDENCIA_BODY }}': reincidencia_history_body,
         '{{ LISTA_RECOMENDACIONES }}': '<li>Reducir el backlog de órdenes pendientes.</li><li>Investigar casos de reincidencia para mejora de procesos.</li>',
         '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}%.",
         '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina"

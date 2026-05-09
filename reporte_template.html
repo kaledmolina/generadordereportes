@@ -166,6 +166,11 @@
             border-color: #FFB74D;
         }
 
+        .stat-box.red {
+            background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+            border-color: #E57373;
+        }
+
         .stat-value {
             font-size: 22pt;
             font-weight: 700;
@@ -507,15 +512,34 @@
             </div>
             <div class="stat-box green">
                 <div class="stat-value">{{ ORDENES_CERRADAS }}</div>
-                <div class="stat-label">Órdenes Cerradas</div>
+                <div class="stat-label">Cerradas</div>
             </div>
-            <div class="stat-box orange">
-                <div class="stat-value">{{ TIEMPO_PROMEDIO_BREVE }}h</div>
-                <div class="stat-label">Tiempo Promedio</div>
+            <div class="stat-box blue">
+                <div class="stat-value">{{ ORDENES_EJECUTADAS }}</div>
+                <div class="stat-label">Ejecutadas</div>
             </div>
             <div class="stat-box blue">
                 <div class="stat-value">{{ TECNICOS_ACTIVOS }}</div>
-                <div class="stat-label">Técnicos Activos</div>
+                <div class="stat-label">Técnicos</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box orange">
+                <div class="stat-value">{{ ORDENES_REPROGRAMADAS }}</div>
+                <div class="stat-label">Reprogramadas</div>
+            </div>
+            <div class="stat-box red">
+                <div class="stat-value">{{ ORDENES_ANULADAS }}</div>
+                <div class="stat-label">Anuladas</div>
+            </div>
+            <div class="stat-box green">
+                <div class="stat-value">{{ TASA_RESOLUCION }}%</div>
+                <div class="stat-label">Tasa Resolución</div>
+            </div>
+            <div class="stat-box orange">
+                <div class="stat-value">{{ TIEMPO_PROMEDIO_BREVE }}h</div>
+                <div class="stat-label">Promedio</div>
             </div>
         </div>
 

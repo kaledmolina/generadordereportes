@@ -127,6 +127,10 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     
     # --- ESTADÍSTICAS ---
     ordenes_cerradas = len(df[df['Estado'].str.lower() == 'cerrada'])
+    ordenes_ejecutadas = len(df[df['Estado'].str.lower() == 'ejecutada'])
+    ordenes_reprogramadas = len(df[df['Estado'].str.lower() == 'reprogramada'])
+    ordenes_anuladas = len(df[df['Estado'].str.lower() == 'anulada'])
+    
     tasa_cierre = (ordenes_cerradas / TOTAL_ORDENES * 100)
     
     # Órdenes con solución (Ejecutadas o Cerradas)
@@ -233,14 +237,27 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     plt.close()
 
     # 8. tendencia_temporal.png
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(trend_df.index, trend_df['Creadas'], marker='o', label='Órdenes Creadas', color=COLORS_DICT['primary'], linewidth=2)
-    ax.plot(trend_df.index, trend_df['Cerradas'], marker='s', label='Órdenes Cerradas', color=COLORS_DICT['secondary'], linewidth=2)
-    ax.fill_between(trend_df.index, trend_df['Creadas'], alpha=0.1, color=COLORS_DICT['primary'])
-    ax.set_title('Tendencia Temporal: Creadas vs Cerradas', fontsize=14, fontweight='bold')
-    ax.legend()
-    ax.grid(True, linestyle='--', alpha=0.6)
-    plt.xticks(rotation=45)
+    fig, ax = plt.subplots(figsize=(14, 7))
+    ax.plot(trend_df.index, trend_df['Creadas'], marker='o', label='Órdenes Creadas', color=COLORS_DICT['primary'], linewidth=2.5)
+    ax.plot(trend_df.index, trend_df['Cerradas'], marker='s', label='Órdenes Cerradas', color=COLORS_DICT['secondary'], linewidth=2.5)
+    
+    # Agregar etiquetas de datos (Números sobre los puntos)
+    for i, (x, y) in enumerate(zip(trend_df.index, trend_df['Creadas'])):
+        if y > 0:
+            ax.text(x, y + 0.5, f'{int(y)}', ha='center', va='bottom', fontsize=9, color=COLORS_DICT['primary'], fontweight='bold')
+    
+    for i, (x, y) in enumerate(zip(trend_df.index, trend_df['Cerradas'])):
+        if y > 0:
+            ax.text(x, y - 1.5, f'{int(y)}', ha='center', va='top', fontsize=9, color=COLORS_DICT['secondary'], fontweight='bold')
+
+    ax.fill_between(trend_df.index, trend_df['Creadas'], alpha=0.05, color=COLORS_DICT['primary'])
+    ax.set_title('Tendencia Temporal: Creadas vs Cerradas (Detalle Diario)', fontsize=14, fontweight='bold', pad=20)
+    ax.legend(loc='upper right')
+    ax.grid(True, linestyle='--', alpha=0.3)
+    
+    # Mejorar formato de fecha en el eje X
+    plt.xticks(rotation=45, ha='right', fontsize=9)
+    plt.tight_layout()
     charts['tendencia_temporal.png'] = fig_to_base64(fig)
     plt.close()
 
@@ -384,6 +401,9 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ TOTAL_ORDENES }}': str(TOTAL_ORDENES),
         '{{ PERIODO_TEXTO }}': periodo_texto,
         '{{ ORDENES_CERRADAS }}': str(ordenes_cerradas),
+        '{{ ORDENES_EJECUTADAS }}': str(ordenes_ejecutadas),
+        '{{ ORDENES_REPROGRAMADAS }}': str(ordenes_reprogramadas),
+        '{{ ORDENES_ANULADAS }}': str(ordenes_anuladas),
         '{{ TIEMPO_PROMEDIO_BREVE }}': f"{tiempo_promedio:.1f}",
         '{{ TECNICOS_ACTIVOS }}': str(len(valid_techs)),
         '{{ TIEMPO_PROMEDIO_HRS }}': f"{tiempo_promedio:.2f}",

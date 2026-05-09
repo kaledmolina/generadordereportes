@@ -10,15 +10,15 @@ Para ejecutar este generador, asegúrate de tener instalado:
 
 1.  **Python 3.8 o superior**
 2.  **Bibliotecas de Python necesarias:**
+    *   `flask`: Para la interfaz web interactiva.
     *   `pandas`: Para el procesamiento y análisis de datos.
     *   `matplotlib`: Para la generación de gráficos.
     *   `openpyxl`: Para la lectura de archivos Excel (.xlsx).
-    *   `jinja2` (Opcional, si se usa para plantillas avanzadas).
 
 ### Instalación de Dependencias
 Ejecuta el siguiente comando en tu terminal para instalar todo lo necesario:
 ```bash
-pip install pandas matplotlib openpyxl
+pip install pandas matplotlib openpyxl flask
 ```
 
 ---
@@ -51,16 +51,15 @@ python generar_reporte_automatico.py
 ### 2. Ver Resultados (Opción Rápida)
 Abre la carpeta `reporte_final/` y visualiza el archivo `reporte_generado.html` directamente en tu navegador.
 
-### 3. Visualización mediante Servidor Local (Puerto 5000)
-Si prefieres visualizar el reporte a través de un servidor local (simulando un entorno web), puedes ejecutar:
+### 3. Visualización mediante Interfaz Web (Recomendado)
+Si prefieres usar la interfaz visual para cargar archivos y ver reportes:
 
 ```bash
-
-python -m http.server 5000
+python app.py
 ```
 
 Luego, abre tu navegador e ingresa a la siguiente URL:
-👉 **[http://127.0.0.1:5000/reporte_final/reporte_generado.html](http://127.0.0.1:5000/reporte_final/reporte_generado.html)**
+👉 **[http://127.0.0.1:5000/](http://127.0.0.1:5000/)**
 
 ---
 

@@ -69,6 +69,30 @@ El reporte está optimizado para una experiencia interactiva y profesional:
 
 ---
 
+## 🌐 Guía de Despliegue en la Web (Hosting)
+
+Si deseas que el reporte sea accesible a través de una URL pública o privada para tu equipo, sigue estas opciones:
+
+### 1. GitHub Pages (Recomendado y Gratis)
+Es la forma más rápida de tener el reporte en la web:
+1.  Sube el archivo `reporte_generado.html` a un repositorio de GitHub.
+2.  Ve a **Settings** > **Pages**.
+3.  En "Branch", selecciona `main` y la carpeta root `/`.
+4.  GitHub te dará una URL (ej. `https://usuario.github.io/proyecto/reporte_generado.html`) para compartir.
+
+### 2. Vercel o Netlify (Despliegue Rápido)
+1.  Arrastra y suelta la carpeta `reporte_final/` en el panel de control de Vercel o Netlify.
+2.  Se generará un enlace público automáticamente.
+
+### 3. Servidor Interno
+*   Simplemente copia el archivo `reporte_generado.html` a la carpeta pública de tu servidor (Apache/Nginx).
+*   Al ser un archivo **único y estático**, no requiere bases de datos ni configuración de servidor adicional para ser visualizado.
+
+> [!IMPORTANT]
+> **Privacidad**: Recuerda que el reporte contiene datos de clientes. Si lo subes a la web, asegúrate de que el repositorio sea **privado** o usa servicios que permitan proteger el acceso con contraseña si es información sensible.
+
+---
+
 ### 3. Compartir
 El reporte está diseñado para ser **auto-contenido**. Todas las imágenes y gráficos están embebidos directamente en el archivo HTML, lo que significa que puedes enviarlo por correo o WhatsApp y se verá perfectamente sin necesidad de archivos adicionales.
 

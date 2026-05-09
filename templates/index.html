@@ -273,7 +273,7 @@
         const loader = document.getElementById('loader');
         const previewSection = document.getElementById('preview-section');
         const previewFrame = document.getElementById('preview-frame');
-        const htmlContentInput = document.getElementById('html-content-input');
+        let currentReportHtml = '';
 
         // Drag and drop logic
         dropZone.addEventListener('click', () => fileInput.click());
@@ -339,7 +339,7 @@
                     previewFrame.src = url;
                     
                     // Prepare download
-                    htmlContentInput.value = html;
+                    currentReportHtml = html;
                     
                     previewSection.style.display = 'block';
                     previewSection.scrollIntoView({ behavior: 'smooth' });
@@ -374,7 +374,7 @@
         }
 
         function downloadHTML() {
-            const html = htmlContentInput.value;
+            const html = currentReportHtml;
             if (!html) {
                 alert('No hay contenido para descargar');
                 return;

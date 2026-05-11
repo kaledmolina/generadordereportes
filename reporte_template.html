@@ -737,6 +737,49 @@
     </div>
 
     <!-- =============================================== -->
+    <!-- PAGE 3.1: RANKING DE CREADORES -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Ranking de Generación (Creadores)</h1>
+        <p>Análisis de los usuarios que han generado las órdenes en el sistema, detallando el volumen de creación y el valor monetario total asociado.</p>
+
+        <div class="chart-container">
+            <img src="charts/creadores_bar.png" alt="Ranking de Creadores">
+            <p class="caption">Figura 5: Top 10 Creadores por Volumen de Órdenes</p>
+        </div>
+
+        <h2>Detalle de Creación por Usuario</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">#</th>
+                    <th style="width: 40%;">Usuario Creador</th>
+                    <th class="text-center" style="width: 25%;">Cant. Órdenes</th>
+                    <th class="text-center" style="width: 25%;">Valor Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_CREADORES_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 2.1: Desempeño por Creador de Órdenes</p>
+
+        <div class="callout warning">
+            <strong>Nota de Gestión:</strong><br>
+            Este ranking permite identificar la carga administrativa de cada usuario y la importancia económica de las órdenes generadas por cada uno.
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 6 de 12</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
     <!-- PAGE 5: PRODUCTIVIDAD TÉCNICA -->
     <!-- =============================================== -->
     <div class="page">

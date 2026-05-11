@@ -58,6 +58,8 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     df['Estado'] = df['Estado'].fillna('OTROS').str.strip().replace('', 'OTROS')
     df['Solicitud Suscriptor'] = df['Solicitud Suscriptor'].fillna('OTROS').str.strip().replace('', 'OTROS')
     df['Zona Cliente'] = df['Zona Cliente'].fillna('SIN ZONA').str.strip().replace('', 'SIN ZONA')
+    df['Creador'] = df['Creador'].fillna('SISTEMA/OTROS').str.strip().replace('', 'SISTEMA/OTROS')
+    df['Valor Total'] = pd.to_numeric(df['Valor Total'], errors='coerce').fillna(0)
 
     # Tiempos
     df['Tiempo Atención'] = df['Fecha Fin Atención'] - df['Fecha Creación']
@@ -308,6 +310,14 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     plt.xticks(rotation=45)
     charts['tendencia_reincidencia.png'] = fig_to_base64(fig)
     plt.close()
+    # 11. creadores_bar.png (Horizontal Top 10)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    c_counts = df['Creador'].value_counts().head(10)
+    bars = ax.barh(c_counts.index[::-1], c_counts.values[::-1], color=COLORS_DICT['accent4'])
+    ax.bar_label(bars, padding=3, fontsize=9)
+    ax.set_title('Top 10 Creadores de Ordenes (Cantidad)', fontsize=14, fontweight='bold')
+    charts['creadores_bar.png'] = fig_to_base64(fig)
+    plt.close()
 
     # --- CONSTRUCCIÓN DE TABLAS ---
     # KPI
@@ -345,6 +355,13 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         display_name = f'<span class="badge badge-danger">SIN SOLUCIÓN</span>' if name == 'SIN SOLUCIÓN' else name
         sol_body += format_html_table_row([i, display_name, count, f"{(count/TOTAL_ORDENES*100):.2f}%"])
     sol_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", "", TOTAL_ORDENES, "100.00%"], is_total=True)
+
+    # Creadores Ranking
+    creadores_body = ""
+    creator_stats = df.groupby('Creador').agg({'N° Orden': 'count', 'Valor Total': 'sum'}).sort_values('N° Orden', ascending=False).head(20)
+    for i, (name, row) in enumerate(creator_stats.iterrows(), 1):
+        creadores_body += format_html_table_row([i, f"<strong>{name}</strong>", int(row['N° Orden']), f"${row['Valor Total']:,.0f}"])
+    creadores_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", "", TOTAL_ORDENES, f"${df['Valor Total'].sum():,.0f}"], is_total=True)
     
     # Clasificación y Tipo
     class_body = ""
@@ -460,6 +477,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ TASA_REINCIDENCIA }}': f"{tasa_reincidencia:.2f}%",
         '{{ REINCIDENCIAS_COUNT }}': str(reincidencias),
         '{{ TABLA_REINCIDENCIA_BODY }}': reincidencia_history_body,
+        '{{ TABLA_CREADORES_BODY }}': creadores_body,
         '{{ LISTA_RECOMENDACIONES }}': '<li>Reducir el backlog de órdenes pendientes.</li><li>Investigar casos de reincidencia para mejora de procesos.</li>',
         '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}%.",
         '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina"

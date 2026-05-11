@@ -358,10 +358,10 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
 
     # Creadores Ranking
     creadores_body = ""
-    creator_stats = df.groupby('Creador').agg({'N° Orden': 'count', 'Valor Total': 'sum'}).sort_values('N° Orden', ascending=False).head(20)
+    creator_stats = df.groupby('Creador').agg({'N° Orden': 'count'}).sort_values('N° Orden', ascending=False).head(20)
     for i, (name, row) in enumerate(creator_stats.iterrows(), 1):
-        creadores_body += format_html_table_row([i, f"<strong>{name}</strong>", int(row['N° Orden']), f"${row['Valor Total']:,.0f}"])
-    creadores_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", "", TOTAL_ORDENES, f"${df['Valor Total'].sum():,.0f}"], is_total=True)
+        creadores_body += format_html_table_row([i, f"<strong>{name}</strong>", int(row['N° Orden'])])
+    creadores_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", "", TOTAL_ORDENES], is_total=True)
     
     # Clasificación y Tipo
     class_body = ""

@@ -429,6 +429,112 @@
             color: #00B4A6;
         }
 
+        /* Presentation Toolbar Styles */
+        .presentation-toolbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            background: rgba(28, 53, 87, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .presentation-toolbar:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .tool-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tool-text {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .tool-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tool-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .tool-select option {
+            background: #1C3557;
+            color: #fff;
+        }
+
+        /* Contenedor del reporte para soportar zoom */
+        .report-container {
+            transform-origin: top center;
+            width: 100%;
+        }
+
+        @media screen and (max-width: 794px) {
+            .presentation-toolbar {
+                width: 95%;
+                gap: 6px;
+                padding: 6px 8px;
+            }
+            .tool-select {
+                max-width: 120px;
+                font-size: 11px;
+                padding: 4px 6px;
+            }
+            #fs-btn-text {
+                display: none;
+            }
+            .tool-btn {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+        }
+
+        @media print {
+            .presentation-toolbar {
+                display: none !important;
+            }
+        }
+
         /* Estilos de visualización en pantalla (Screen) y responsividad */
         @media screen {
             body {
@@ -562,11 +668,12 @@
 </head>
 
 <body>
+    <div class="report-container">
 
     <!-- =============================================== -->
     <!-- PAGE 0: MODO EJECUTIVO (ONE-PAGER) -->
     <!-- =============================================== -->
-    <div class="page one-pager">
+    <div class="page one-pager" id="page-1">
         <div>
             <div style="font-size: 10pt; color: #00B4A6; margin-bottom: 5px; font-weight: 600;">RESUMEN EJECUTIVO — Abril 2026</div>
             <h1>Dashboard Operativo</h1>
@@ -605,7 +712,7 @@
     <!-- =============================================== -->
     <!-- PAGE 1: RESUMEN EJECUTIVO -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-2">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -662,7 +769,7 @@
     <!-- =============================================== -->
     <!-- PAGE 2: INDICADORES CLAVE -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-3">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -702,7 +809,7 @@
     <!-- =============================================== -->
     <!-- PAGE 3: TENDENCIAS TEMPORALES -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-4">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -729,7 +836,7 @@
     <!-- =============================================== -->
     <!-- PAGE 2: ÓRDENES POR BARRIO -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-5">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -773,7 +880,7 @@
     <!-- =============================================== -->
     <!-- PAGE 3: REPORTE POR TÉCNICO -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-6">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -817,7 +924,7 @@
     <!-- =============================================== -->
     <!-- PAGE 3.1: RANKING DE CREADORES -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-7">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -859,7 +966,7 @@
     <!-- =============================================== -->
     <!-- PAGE 5: PRODUCTIVIDAD TÉCNICA -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-8">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -886,7 +993,7 @@
     <!-- =============================================== -->
     <!-- PAGE 6: ÍNDICE DE REINCIDENCIA -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-9">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -943,7 +1050,7 @@
     <!-- =============================================== -->
     <!-- PAGE 4: ANÁLISIS POR SOLUCIÓN -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-10">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -982,7 +1089,7 @@
     <!-- =============================================== -->
     <!-- MÁS DETALLE: CAMBIOS DE EQUIPOS (PÁGINA NUEVA) -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-11">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -1047,7 +1154,7 @@
     <!-- =============================================== -->
     <!-- PAGE 5: CLASIFICACIÓN Y TIPO DE ORDEN -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-12">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -1105,7 +1212,7 @@
     <!-- =============================================== -->
     <!-- PAGE 7: ESTADO DE LAS ÓRDENES -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-13">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -1140,7 +1247,7 @@
     <!-- =============================================== -->
     <!-- PAGE 6: ANÁLISIS DE TIEMPOS -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-14">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -1212,7 +1319,7 @@
     <!-- =============================================== -->
     <!-- PAGE 7: GRÁFICOS ADICIONALES -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-15">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -1249,7 +1356,7 @@
     <!-- =============================================== -->
     <!-- PAGE 8: CONCLUSIONES -->
     <!-- =============================================== -->
-    <div class="page">
+    <div class="page" id="page-16">
         <div class="page-header">
             <div class="page-header-title">Reporte Completo de Órdenes de Servicio — Abril 2026</div>
         </div>
@@ -1324,33 +1431,133 @@
             <div>Página 15 de 15</div>
         </div>
     </div>
+    </div> <!-- Cierre de .report-container -->
 
-    <button class="floating-fullscreen" onclick="toggleFullScreen()" id="fs-btn">
-        <span>⛶</span> Pantalla Completa
-    </button>
+    <!-- Barra de herramientas de presentación -->
+    <div class="presentation-toolbar">
+        <button class="tool-btn" onclick="adjustZoom(-0.1)" title="Alejar">➖</button>
+        <span class="tool-text" id="zoom-text">100%</span>
+        <button class="tool-btn" onclick="adjustZoom(0.1)" title="Acercar">➕</button>
+        
+        <div class="tool-divider"></div>
+        
+        <button class="tool-btn" onclick="prevPage()" title="Página Anterior">◀</button>
+        <select class="tool-select" id="page-select" onchange="jumpToPage(this.value)">
+            <option value="1">1. Portada Resumen</option>
+            <option value="2">2. Resumen Ejecutivo (Pág 1)</option>
+            <option value="3">3. Indicadores Clave (Pág 2)</option>
+            <option value="4">4. Tendencia Temporal (Pág 3)</option>
+            <option value="5">5. Órdenes Barrio (Pág 4)</option>
+            <option value="6">6. Reporte Técnico (Pág 5)</option>
+            <option value="7">7. Ranking Creadores (Pág 6)</option>
+            <option value="8">8. Productividad (Pág 7)</option>
+            <option value="9">9. Reincidencia (Pág 8)</option>
+            <option value="10">10. Tipos Solución (Pág 9)</option>
+            <option value="11">11. Cambios Equipos (Pág 10)</option>
+            <option value="12">12. Clasificación (Pág 11)</option>
+            <option value="13">13. Estado Órdenes (Pág 12)</option>
+            <option value="14">14. Tiempos Atención (Pág 13)</option>
+            <option value="15">15. Visualizaciones (Pág 14)</option>
+            <option value="16">16. Conclusiones (Pág 15)</option>
+        </select>
+        <button class="tool-btn" onclick="nextPage()" title="Siguiente Página">▶</button>
+        
+        <div class="tool-divider"></div>
+        
+        <button class="tool-btn" onclick="toggleFullScreen()" id="fs-btn" title="Pantalla Completa">
+            <span id="fs-icon">⛶</span> <span id="fs-btn-text">Pantalla Completa</span>
+        </button>
+    </div>
 
     <script>
+        let currentZoom = 1.0;
+        
+        function adjustZoom(amount) {
+            currentZoom = Math.min(Math.max(currentZoom + amount, 0.5), 2.0);
+            document.getElementById('zoom-text').innerText = Math.round(currentZoom * 100) + '%';
+            
+            const container = document.querySelector('.report-container');
+            if (container) {
+                container.style.zoom = currentZoom;
+            }
+        }
+        
+        function jumpToPage(pageNum) {
+            const pageEl = document.getElementById('page-' + pageNum);
+            if (pageEl) {
+                pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        function prevPage() {
+            const pageSelect = document.getElementById('page-select');
+            let currentPage = parseInt(pageSelect.value);
+            if (currentPage > 1) {
+                pageSelect.value = currentPage - 1;
+                jumpToPage(currentPage - 1);
+            }
+        }
+        
+        function nextPage() {
+            const pageSelect = document.getElementById('page-select');
+            let currentPage = parseInt(pageSelect.value);
+            const maxPage = pageSelect.options.length;
+            if (currentPage < maxPage) {
+                pageSelect.value = currentPage + 1;
+                jumpToPage(currentPage + 1);
+            }
+        }
+
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
                     alert(`Error al activar pantalla completa: ${err.message}`);
                 });
-                document.getElementById('fs-btn').innerHTML = '<span>✕</span> Salir';
+                document.getElementById('fs-icon').innerText = '✕';
+                const textEl = document.getElementById('fs-btn-text');
+                if (textEl) textEl.innerText = 'Salir';
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                    document.getElementById('fs-btn').innerHTML = '<span>⛶</span> Pantalla Completa';
+                    document.getElementById('fs-icon').innerText = '⛶';
+                    const textEl = document.getElementById('fs-btn-text');
+                    if (textEl) textEl.innerText = 'Pantalla Completa';
                 }
             }
         }
 
-        // Escuchar cambios de pantalla completa para actualizar el botón si el usuario sale con Esc
+        // Escuchar cambios de pantalla completa
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement) {
-                document.getElementById('fs-btn').innerHTML = '<span>⛶</span> Pantalla Completa';
+                document.getElementById('fs-icon').innerText = '⛶';
+                const textEl = document.getElementById('fs-btn-text');
+                if (textEl) textEl.innerText = 'Pantalla Completa';
             }
+        });
+        
+        // Auto-actualizar selector de página al hacer scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = document.querySelectorAll('.page');
+            const pageSelect = document.getElementById('page-select');
+            
+            const observerOptions = {
+                root: null,
+                rootMargin: '-50% 0px -50% 0px',
+                threshold: 0
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        const pageNum = id.replace('page-', '');
+                        pageSelect.value = pageNum;
+                    }
+                });
+            }, observerOptions);
+            
+            pages.forEach(page => observer.observe(page));
         });
     </script>
 </body>
-
 </html>

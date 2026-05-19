@@ -429,6 +429,84 @@
             color: #00B4A6;
         }
 
+        /* Estilos de visualización en pantalla (Screen) y responsividad */
+        @media screen {
+            body {
+                background-color: #f0f2f5;
+                padding: 20px 0;
+            }
+            .page {
+                width: 210mm; /* Ancho estándar A4 */
+                margin: 0 auto 30px auto;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+                border-radius: 8px;
+            }
+        }
+
+        @media screen and (max-width: 794px) {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .page {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 25px 20px;
+                box-shadow: none;
+                border-radius: 0;
+                border-bottom: 2px solid #eee;
+            }
+            .page-footer {
+                position: static;
+                margin-top: 40px;
+                padding-top: 10px;
+                left: 0;
+                right: 0;
+            }
+            /* Grid y Flex responsivos */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
+            }
+            .two-columns {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            .charts-row, .charts-three {
+                flex-direction: column !important;
+                gap: 15px;
+            }
+            /* Estilos específicos de one-pager en móvil */
+            .one-pager {
+                padding: 25px 20px;
+            }
+            .one-pager .kpi-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+            }
+            .one-pager .kpi-card {
+                padding: 15px;
+            }
+            .one-pager .kpi-value {
+                font-size: 28pt;
+            }
+            .one-pager .main-finding {
+                padding: 20px;
+                margin: 25px 0;
+            }
+            .one-pager .main-finding p {
+                font-size: 11pt;
+            }
+            /* Tablas con scroll horizontal para móvil */
+            table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
         /* Print styles */
         @media print {
             @page {

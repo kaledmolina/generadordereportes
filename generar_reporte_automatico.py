@@ -319,6 +319,27 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     charts['creadores_bar.png'] = fig_to_base64(fig)
     plt.close()
 
+    # 12. equipos_cambios_bar.png
+    fig, ax = plt.subplots(figsize=(10, 6))
+    eq_categories = {
+        'Equipo Defectuoso\n(Cód. 7)': df['Solución Técnico'].astype(str).str.contains('7 CAMBIO -EQUIPO DEFECTUOSO|equipo defectuoso', case=False, na=False).sum(),
+        'Cambio de Bridge/Router\n(Cód. 24)': df['Solución Técnico'].astype(str).str.contains('24 CAMBIO DE BRIDGE|cambio de bridge', case=False, na=False).sum(),
+        'Equipo Quemado\n(Cód. 8)': df['Solución Técnico'].astype(str).str.contains('8 CAMBIO -EQUIPO QUEMADO|equipo quemado', case=False, na=False).sum(),
+        'Otros\n(Mal Uso/Cámara)': df['Solución Técnico'].astype(str).str.contains('9 CAMBIO- EQUIPO MAL USO USUARIO|25 CAMBIO DE CAMARA', case=False, na=False).sum()
+    }
+    eq_categories = {k: v for k, v in eq_categories.items() if v > 0}
+    eq_categories = dict(sorted(eq_categories.items(), key=lambda item: item[1], reverse=True))
+    
+    bar_colors = [COLORS_DICT['primary'], COLORS_DICT['secondary'], COLORS_DICT['accent2'], COLORS_DICT['accent1']]
+    bars = ax.bar(eq_categories.keys(), eq_categories.values(), color=bar_colors[:len(eq_categories)])
+    ax.bar_label(bars, padding=3, fontsize=10)
+    ax.set_title('Distribución de Cambios de Equipo por Tipo', fontsize=14, fontweight='bold', pad=20)
+    plt.xticks(fontsize=9)
+    plt.tight_layout()
+    charts['equipos_cambios_bar.png'] = fig_to_base64(fig)
+    plt.close()
+
+
     # --- CONSTRUCCIÓN DE TABLAS ---
     # KPI
     kpi_body = ""
@@ -403,6 +424,49 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     metrics_body += format_html_table_row(["Percentil 75%", f"{df['Tiempo Atención Positivo'].quantile(0.75):.2f} horas"])
     metrics_body += format_html_table_row(["Desviación Estándar", f"{stats['std']:.2f} horas"])
 
+    # --- ANÁLISIS DE CAMBIOS DE EQUIPOS ---
+    df['Es_Cambio_Equipo'] = df['Solución Técnico'].astype(str).str.contains(
+        r'7 CAMBIO -EQUIPO DEFECTUOSO|24 CAMBIO DE BRIDGE|8 CAMBIO -EQUIPO QUEMADO|9 CAMBIO- EQUIPO|25 CAMBIO DE CAMARA|cambio de bridge|equipo defectuoso|equipo quemado|cambio de camara',
+        case=False, na=False
+    )
+    
+    total_eq_orders = df['Es_Cambio_Equipo'].sum()
+    pct_total_eq = (total_eq_orders / TOTAL_ORDENES * 100) if TOTAL_ORDENES > 0 else 0
+    
+    equipos_defectuosos_count = df['Solución Técnico'].astype(str).str.contains('7 CAMBIO -EQUIPO DEFECTUOSO|equipo defectuoso', case=False, na=False).sum()
+    equipos_bridge_count = df['Solución Técnico'].astype(str).str.contains('24 CAMBIO DE BRIDGE|cambio de bridge', case=False, na=False).sum()
+    equipos_quemados_count = df['Solución Técnico'].astype(str).str.contains('8 CAMBIO -EQUIPO QUEMADO|equipo quemado', case=False, na=False).sum()
+    
+    # Tabla de Cambios de Equipo por Técnico
+    tech_eq = df.groupby('Técnico Principal').agg(
+        Total_Ordenes=('N° Orden', 'count'),
+        Cambios_Equipos=('Es_Cambio_Equipo', 'sum')
+    ).reset_index()
+    
+    tech_eq = tech_eq[tech_eq['Cambios_Equipos'] > 0].sort_values('Cambios_Equipos', ascending=False)
+    
+    tabla_equipos_body = ""
+    for i, (idx, row) in enumerate(tech_eq.iterrows(), 1):
+        name = row['Técnico Principal']
+        tot_ord = int(row['Total_Ordenes'])
+        eq_chg = int(row['Cambios_Equipos'])
+        percentage = (eq_chg / tot_ord * 100) if tot_ord > 0 else 0
+        tabla_equipos_body += format_html_table_row([
+            i,
+            f"<strong>{name}</strong>",
+            tot_ord,
+            eq_chg,
+            f"{percentage:.2f}%"
+        ])
+    
+    tabla_equipos_body += format_html_table_row([
+        "<strong>TOTAL GENERAL</strong>",
+        "",
+        TOTAL_ORDENES,
+        int(total_eq_orders),
+        f"{pct_total_eq:.2f}%"
+    ], is_total=True)
+
     # --- ENSAMBLAJE ---
     with open(template_path, 'r', encoding='utf-8') as f:
         html = f.read()
@@ -439,6 +503,12 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         solo_mes = "Abril 2026"
 
     replacements = {
+        '{{ EQUIPOS_CAMBIOS_COUNT }}': str(total_eq_orders),
+        '{{ PORCENTAJE_CAMBIOS_EQUIPOS }}': f"{pct_total_eq:.2f}",
+        '{{ EQUIPOS_DEFECTUOSOS_COUNT }}': str(equipos_defectuosos_count),
+        '{{ EQUIPOS_QUEMADOS_COUNT }}': str(equipos_quemados_count),
+        '{{ EQUIPOS_BRIDGE_COUNT }}': str(equipos_bridge_count),
+        '{{ TABLA_EQUIPOS_BODY }}': tabla_equipos_body,
         '{{ TITULO_PAGINA }}': f'Reporte Órdenes de Servicio - {solo_mes}',
         '{{ REPORTE_HEADER_TITLE }}': f'Reporte Completo de Órdenes de Servicio — {solo_mes}',
         '{{ TOTAL_ORDENES }}': str(TOTAL_ORDENES),

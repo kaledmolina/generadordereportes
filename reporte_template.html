@@ -429,6 +429,84 @@
             color: #00B4A6;
         }
 
+        /* Estilos de visualización en pantalla (Screen) y responsividad */
+        @media screen {
+            body {
+                background-color: #f0f2f5;
+                padding: 20px 0;
+            }
+            .page {
+                width: 210mm; /* Ancho estándar A4 */
+                margin: 0 auto 30px auto;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+                border-radius: 8px;
+            }
+        }
+
+        @media screen and (max-width: 794px) {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .page {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 25px 20px;
+                box-shadow: none;
+                border-radius: 0;
+                border-bottom: 2px solid #eee;
+            }
+            .page-footer {
+                position: static;
+                margin-top: 40px;
+                padding-top: 10px;
+                left: 0;
+                right: 0;
+            }
+            /* Grid y Flex responsivos */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
+            }
+            .two-columns {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            .charts-row, .charts-three {
+                flex-direction: column !important;
+                gap: 15px;
+            }
+            /* Estilos específicos de one-pager en móvil */
+            .one-pager {
+                padding: 25px 20px;
+            }
+            .one-pager .kpi-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+            }
+            .one-pager .kpi-card {
+                padding: 15px;
+            }
+            .one-pager .kpi-value {
+                font-size: 28pt;
+            }
+            .one-pager .main-finding {
+                padding: 20px;
+                margin: 25px 0;
+            }
+            .one-pager .main-finding p {
+                font-size: 11pt;
+            }
+            /* Tablas con scroll horizontal para móvil */
+            table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
         /* Print styles */
         @media print {
             @page {
@@ -577,7 +655,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 1 de 10</div>
+            <div>Página 1 de 15</div>
         </div>
     </div>
 
@@ -617,7 +695,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 2 de 12</div>
+            <div>Página 2 de 15</div>
         </div>
     </div>
 
@@ -644,7 +722,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 3 de 12</div>
+            <div>Página 3 de 15</div>
         </div>
     </div>
 
@@ -688,7 +766,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 3 de 10</div>
+            <div>Página 4 de 15</div>
         </div>
     </div>
 
@@ -732,7 +810,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 5 de 12</div>
+            <div>Página 5 de 15</div>
         </div>
     </div>
 
@@ -774,7 +852,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 6 de 12</div>
+            <div>Página 6 de 15</div>
         </div>
     </div>
 
@@ -801,7 +879,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 6 de 13</div>
+            <div>Página 7 de 15</div>
         </div>
     </div>
 
@@ -858,7 +936,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 7 de 13</div>
+            <div>Página 8 de 15</div>
         </div>
     </div>
 
@@ -897,7 +975,72 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 5 de 10</div>
+            <div>Página 9 de 15</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- MÁS DETALLE: CAMBIOS DE EQUIPOS (PÁGINA NUEVA) -->
+    <!-- =============================================== -->
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
+        </div>
+
+        <h1>Reporte Detallado de Cambios de Equipos</h1>
+        <p>Análisis de las órdenes de servicio que resultaron en cambios de equipos de red o terminales (como routers, bridges, cámaras, etc.) debido a fallas, equipos quemados o defectuosos.</p>
+
+        <div class="stats-grid">
+            <div class="stat-box blue">
+                <div class="stat-value">{{ EQUIPOS_CAMBIOS_COUNT }}</div>
+                <div class="stat-label">Total Cambios de Equipos</div>
+            </div>
+            <div class="stat-box green">
+                <div class="stat-value">{{ PORCENTAJE_CAMBIOS_EQUIPOS }}%</div>
+                <div class="stat-label">% del Total de Órdenes</div>
+            </div>
+            <div class="stat-box orange">
+                <div class="stat-value">{{ EQUIPOS_DEFECTUOSOS_COUNT }}</div>
+                <div class="stat-label">Equipos Defectuosos (Cód. 7)</div>
+            </div>
+            <div class="stat-box red">
+                <div class="stat-value">{{ EQUIPOS_QUEMADOS_COUNT }}</div>
+                <div class="stat-label">Equipos Quemados (Cód. 8)</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <img src="charts/equipos_cambios_bar.png" alt="Distribución de Cambios de Equipos">
+            <p class="caption">Figura 7.1: Distribución de Cambios de Equipo por Tipo</p>
+        </div>
+
+        <h2>Ranking de Técnicos con Mayor Frecuencia de Cambios</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">#</th>
+                    <th style="width: 40%;">Técnico</th>
+                    <th class="text-center" style="width: 15%;">Total Órdenes</th>
+                    <th class="text-center" style="width: 20%;">Cambios de Equipos</th>
+                    <th class="text-center" style="width: 15%;">Tasa de Cambio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ TABLA_EQUIPOS_BODY }}
+            </tbody>
+        </table>
+        <p class="caption">Tabla 3.1: Relación de cambios de equipo por técnico principal</p>
+
+        <div class="callout highlight">
+            <strong>Indicadores Clave del Inventario Reemplazado:</strong><br>
+            • Los cambios de equipos representan el <strong>{{ PORCENTAJE_CAMBIOS_EQUIPOS }}%</strong> de todas las visitas técnicas.<br>
+            • Se identificaron un total de <strong>{{ EQUIPOS_DEFECTUOSOS_COUNT }} equipos defectuosos</strong> y <strong>{{ EQUIPOS_QUEMADOS_COUNT }} equipos quemados</strong>.<br>
+            • Los routers o bridges reemplazados (Código 24) sumaron <strong>{{ EQUIPOS_BRIDGE_COUNT }} unidades</strong>.
+        </div>
+
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 10 de 15</div>
         </div>
     </div>
 
@@ -955,7 +1098,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 6 de 10</div>
+            <div>Página 11 de 15</div>
         </div>
     </div>
 
@@ -990,7 +1133,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 7 de 10</div>
+            <div>Página 12 de 15</div>
         </div>
     </div>
 
@@ -1062,7 +1205,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 8 de 10</div>
+            <div>Página 13 de 15</div>
         </div>
     </div>
 
@@ -1099,7 +1242,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 9 de 10</div>
+            <div>Página 14 de 15</div>
         </div>
     </div>
 
@@ -1172,7 +1315,7 @@
 
         <div class="page-footer">
             <div>{{ FOOTER_EMPRESA }} - {{ PERIODO_SOLO_MES }}</div>
-            <div>Página 10 de 10</div>
+            <div>Página 15 de 15</div>
         </div>
     </div>
 

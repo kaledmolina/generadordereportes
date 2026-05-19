@@ -141,17 +141,16 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     trend_created = df.groupby('Fecha_Creacion_Dia').size()
     trend_executed = df_con_fecha.groupby(df_con_fecha['Fecha Fin Atención'].dt.date).size()
     
-    all_days = sorted(list(set(trend_created.index) | set(trend_executed.index)))
+    min_date = df['Fecha Creación'].min().date()
+    max_date = df['Fecha Creación'].max().date()
+    
+    # Rango completo de fechas consecutivas del mes (mostrando todos los días y los días que faltan)
+    all_days = pd.date_range(start=min_date, end=max_date).date
+    
     trend_df = pd.DataFrame(index=all_days)
     trend_df['Creadas'] = trend_created
     trend_df['Ejecutadas'] = trend_executed
     trend_df = trend_df.fillna(0)
-    
-    # Filtrar para que el gráfico solo muestre el rango del mes del reporte
-    # (Evita fechas inconsistentes de meses anteriores o posteriores)
-    min_date = df['Fecha Creación'].min().date()
-    max_date = df['Fecha Creación'].max().date()
-    trend_df = trend_df[(trend_df.index >= min_date) & (trend_df.index <= max_date)]
     
     # --- ESTADÍSTICAS ---
     ordenes_cerradas = len(df[df['Estado'].str.lower() == 'cerrada'])
@@ -283,8 +282,9 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     ax.legend(loc='upper right')
     ax.grid(True, linestyle='--', alpha=0.3)
     
-    # Mejorar formato de fecha en el eje X
-    plt.xticks(rotation=45, ha='right', fontsize=9)
+    # Mostrar explícitamente todos los días del mes en el eje X
+    ax.set_xticks(trend_df.index)
+    ax.set_xticklabels([d.strftime('%d/%m') for d in trend_df.index], rotation=45, ha='right', fontsize=9)
     plt.tight_layout()
     charts['tendencia_temporal.png'] = fig_to_base64(fig)
     plt.close()

@@ -546,6 +546,24 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         tabla_tipo_orden_nueva_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px;">{n}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{c}</td></tr>\n'
     tabla_tipo_orden_nueva_body += f'<tr style="font-weight: bold; background-color: #E2EFDA;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{total_to}</td></tr>\n'
     
+    # Nueva tabla TIPO Y SOLUCION
+    tabla_tipo_solucion_body = ""
+    # Agrupar por Tipo Orden y contar totales
+    tipo_totales = df['Tipo Orden'].value_counts()
+    # Ordenar alfabéticamente el tipo de orden, similar a la imagen
+    for t_orden in sorted(tipo_totales.index):
+        t_count = tipo_totales[t_orden]
+        tabla_tipo_solucion_body += f'<tr style="font-weight: bold;"><td style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">&#9634; {t_orden}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">{t_count}</td></tr>\n'
+        
+        # Obtener las soluciones para este tipo de orden, ordenadas por cantidad descendente
+        df_t = df[df['Tipo Orden'] == t_orden]
+        soluciones_t = df_t['Solución Técnico'].value_counts()
+        for sol, s_count in soluciones_t.items():
+            tabla_tipo_solucion_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px; padding-left: 30px;">{sol}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{s_count}</td></tr>\n'
+            
+    tabla_tipo_solucion_body += f'<tr style="font-weight: bold; background-color: #DDEBF7;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{TOTAL_ORDENES}</td></tr>\n'
+
+    
     estado_body = ""
     for n, c in df['Estado'].value_counts().items():
         n_lower = n.lower()
@@ -684,6 +702,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ TABLA_CLASIFICACION_BODY }}': class_body,
         '{{ TABLA_TIPO_ORDEN_BODY }}': tipo_body,
         '{{ TABLA_TIPO_ORDEN_NUEVA_BODY }}': tabla_tipo_orden_nueva_body,
+        '{{ TABLA_TIPO_SOLUCION_BODY }}': tabla_tipo_solucion_body,
         '{{ TABLA_ESTADO_BODY }}': estado_body,
         '{{ ORDENES_CON_TIEMPO_VALIDO }}': str(ordenes_con_tiempo_valido),
         '{{ MEDIANA_TIEMPO }}': f"{mediana_tiempo:.2f}",

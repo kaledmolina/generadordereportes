@@ -607,6 +607,25 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
                 
     tabla_tipo_zona_barrio_body += f'<tr style="font-weight: bold; background-color: #DDEBF7;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{TOTAL_ORDENES}</td></tr>\n'
 
+    # Nueva tabla TIPO ORDEN -> SOLICITUD
+    tabla_tipo_solicitud_body = ""
+    # Agrupar por Tipo Orden, ordenar alfabéticamente
+    for t_orden in sorted(tipo_totales.index):
+        t_count = tipo_totales[t_orden]
+        tabla_tipo_solicitud_body += f'<tr style="font-weight: bold;"><td style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">&#9634; {t_orden}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">{t_count}</td></tr>\n'
+        
+        df_t = df[df['Tipo Orden'] == t_orden]
+        # Para evitar errores con valores nulos
+        df_t_sol = df_t.copy()
+        df_t_sol['Solicitud Suscriptor'] = df_t_sol['Solicitud Suscriptor'].fillna('Sin Solicitud')
+        solicitudes_t = df_t_sol['Solicitud Suscriptor'].value_counts()
+        
+        for sol, s_count in solicitudes_t.items():
+            tabla_tipo_solicitud_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px; padding-left: 30px;">{sol}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{s_count}</td></tr>\n'
+            
+    tabla_tipo_solicitud_body += f'<tr style="font-weight: bold; background-color: #DDEBF7;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{TOTAL_ORDENES}</td></tr>\n'
+
+
 
 
     
@@ -751,6 +770,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ TABLA_TIPO_SOLUCION_BODY }}': tabla_tipo_solucion_body,
         '{{ TABLA_TECNICO_SOLUCION_BODY }}': tabla_tecnico_solucion_body,
         '{{ TABLA_TIPO_ZONA_BARRIO_BODY }}': tabla_tipo_zona_barrio_body,
+        '{{ TABLA_TIPO_SOLICITUD_BODY }}': tabla_tipo_solicitud_body,
         '{{ TABLA_ESTADO_BODY }}': estado_body,
         '{{ ORDENES_CON_TIEMPO_VALIDO }}': str(ordenes_con_tiempo_valido),
         '{{ MEDIANA_TIEMPO }}': f"{mediana_tiempo:.2f}",

@@ -42,8 +42,7 @@ def format_html_table_row(cells, is_total=False, aligns=None):
     return html
 
 def generate_report_from_df(df, template_path='reporte_template.html'):
-    # Total inicial
-    TOTAL_ORDENES = len(df)
+    # Inicialmente el DataFrame puede tener varios meses
     
     # --- PROCESAMIENTO DE DATOS (Lógica de generate_complete_report_data.py) ---
     df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce')
@@ -65,6 +64,132 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     df['Tiempo Atención'] = df['Fecha Fin Atención'] - df['Fecha Creación']
     df['Tiempo Atención (horas)'] = df['Tiempo Atención'].dt.total_seconds() / 3600
     df['Tiempo Atención Positivo'] = df['Tiempo Atención (horas)'].apply(lambda x: x if x > 0 else 0)
+    
+    # --- COMPARATIVA MULTIMES (NUEVO) ---
+    df_full = df.copy()
+    
+    def get_dias_ejecucion(row):
+        estado = str(row['Estado']).lower()
+        if estado in ['cerrada', 'ejecutada']:
+            if pd.isna(row['Tiempo Atención (horas)']) or row['Tiempo Atención (horas)'] < 0:
+                return 'Mal registradas'
+            dias = int(row['Tiempo Atención (horas)'] // 24)
+            if dias >= 7:
+                return '=> 7'
+            return str(dias)
+        else:
+            return 'No aplica'
+
+    df_full['Dias_Ejecucion_Cat'] = df_full.apply(get_dias_ejecucion, axis=1)
+    df_full['Mes_Anio'] = df_full['Fecha Creación'].dt.to_period('M')
+    
+    meses_unicos = sorted([m for m in df_full['Mes_Anio'].unique() if pd.notna(m)])
+    meses_comparativa = meses_unicos[-6:] if len(meses_unicos) > 3 else meses_unicos
+    
+    nombres_meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+    
+    comparativa_headers = ""
+    meses_info = []
+    
+    for m in meses_comparativa:
+        mes_nombre = f"{nombres_meses[m.month - 1].upper()} {m.year if m.year != 2026 else ''}".strip()
+        if len(meses_comparativa) <= 3:
+            mes_nombre = f"{nombres_meses[m.month - 1].upper()} {m.year}"
+        comparativa_headers += f'<th class="text-center" style="background-color: #1C3557; color: white;">NUMERO DE<br>ORDENES<br>{mes_nombre}</th>\n'
+        meses_info.append((m, mes_nombre))
+        
+    comparativa_headers += '<th class="text-center" style="background-color: #1C3557; color: white;"># ORDE/TOTAL<br>ORDE</th>\n<th class="text-center" style="background-color: #1C3557; color: white;">PORCENTAJE<br>ACUMULADO</th>'
+    
+    categorias = ['0', '1', '2', '3', '4', '5', '6', '=> 7', 'Mal registradas']
+    tabla_comparativa_body = ""
+    acumulado_ultimo_mes = 0
+    ultimo_mes = meses_info[-1][0] if meses_info else None
+    
+    for cat in categorias:
+        row_html = "<tr>\n"
+        if cat == '6' or cat == '=> 7':
+            row_html = '<tr style="background-color: #fbd4b4;">\n'
+        
+        texto_cat = cat
+        if cat == '6' or cat == '=> 7':
+            texto_cat = f'<span style="color: red;">{cat}</span>'
+            
+        row_html += f'<td class="text-center" style="border: 1px solid #000;">{texto_cat}</td>\n'
+        
+        count_ultimo_mes = 0
+        for m, _ in meses_info:
+            df_mes = df_full[df_full['Mes_Anio'] == m]
+            count = len(df_mes[df_mes['Dias_Ejecucion_Cat'] == cat])
+            row_html += f'<td class="text-center" style="border: 1px solid #000;">{count}</td>\n'
+            if m == ultimo_mes:
+                count_ultimo_mes = count
+                
+        total_m = len(df_full[(df_full['Mes_Anio'] == ultimo_mes) & (df_full['Dias_Ejecucion_Cat'] != 'No aplica')])
+        if total_m == 0: total_m = 1
+        pct_orde = (count_ultimo_mes / total_m * 100)
+        acumulado_ultimo_mes += pct_orde
+        
+        if cat == 'Mal registradas':
+            row_html += f'<td class="text-center" style="border: 1px solid #000;">0.00%</td>\n'
+            row_html += f'<td class="text-center" style="border: 1px solid #000;">100.00%</td>\n'
+        else:
+            row_html += f'<td class="text-center" style="border: 1px solid #000;">{pct_orde:.2f}%</td>\n'
+            row_html += f'<td class="text-center" style="border: 1px solid #000;">{acumulado_ultimo_mes:.2f}%</td>\n'
+        row_html += "</tr>\n"
+        tabla_comparativa_body += row_html
+        
+    # Totales
+    row_total = '<tr style="background-color: #5b9bd5; color: white; font-weight: bold;">\n'
+    row_total += '<td style="border: 1px solid #000;">TOTAL DE ORDENES</td>\n'
+    for m, _ in meses_info:
+        tot = len(df_full[df_full['Mes_Anio'] == m])
+        row_total += f'<td class="text-center" style="border: 1px solid #000;">{tot}</td>\n'
+    row_total += '<td class="text-center" style="border: 1px solid #000;">100.00%</td>\n<td style="border: 1px solid #000;"></td>\n</tr>\n'
+    tabla_comparativa_body += row_total
+    
+    # Total órdenes diarias
+    row_diarias = '<tr style="background-color: #5b9bd5; color: white; font-weight: bold;">\n'
+    row_diarias += '<td style="border: 1px solid #000;">TOTAL ORDENES DIARIAS</td>\n'
+    diarias_por_mes = {}
+    for m, _ in meses_info:
+        df_mes = df_full[df_full['Mes_Anio'] == m]
+        dias_activos = df_mes['Fecha Creación'].dt.date.nunique()
+        tot = len(df_mes)
+        diaria = round(tot / dias_activos) if dias_activos > 0 else 0
+        diarias_por_mes[m] = diaria
+        row_diarias += f'<td class="text-center" style="border: 1px solid #000;">{diaria}</td>\n'
+    row_diarias += '<td style="border: 1px solid #000;"></td>\n<td style="border: 1px solid #000;"></td>\n</tr>\n'
+    tabla_comparativa_body += row_diarias
+    
+    row_pct = '<tr style="background-color: #5b9bd5; color: white; font-weight: bold;">\n'
+    row_pct += '<td style="border: 1px solid #000;">PORCENTAJE</td>\n'
+    for m, _ in meses_info:
+        tot = len(df_full[df_full['Mes_Anio'] == m])
+        diaria = diarias_por_mes[m]
+        pct = (diaria / tot * 100) if tot > 0 else 0
+        row_pct += f'<td class="text-center" style="border: 1px solid #000;">{pct:.2f}%</td>\n'
+    row_pct += '<td style="border: 1px solid #000;"></td>\n<td style="border: 1px solid #000;"></td>\n</tr>\n'
+    tabla_comparativa_body += row_pct
+    
+    row_cuadrilla = '<tr style="background-color: #5b9bd5; color: white; font-weight: bold;">\n'
+    row_cuadrilla += '<td style="border: 1px solid #000;">TOTAL ORDENES DIARIAS X CUADRILLA</td>\n'
+    for m, _ in meses_info:
+        df_mes = df_full[df_full['Mes_Anio'] == m]
+        valid_techs_m = [t for t in df_mes['Técnico Principal'].unique() if t not in ['SIN ASIGNAR', 'Planta externa', 'Soporte Noc', 'Soporte NOC']]
+        num_cuadrillas = len(valid_techs_m)
+        diaria = diarias_por_mes[m]
+        x_cuadrilla = round(diaria / num_cuadrillas) if num_cuadrillas > 0 else 0
+        row_cuadrilla += f'<td class="text-center" style="border: 1px solid #000;">{x_cuadrilla}</td>\n'
+    row_cuadrilla += '<td style="border: 1px solid #000;"></td>\n<td style="border: 1px solid #000;"></td>\n</tr>\n'
+    tabla_comparativa_body += row_cuadrilla
+    
+    # --- FILTRAR PARA EL RESTO DEL REPORTE ---
+    if ultimo_mes is not None:
+        df = df_full[df_full['Mes_Anio'] == ultimo_mes].copy()
+        
+    TOTAL_ORDENES = len(df)
+    if TOTAL_ORDENES == 0:
+        TOTAL_ORDENES = 1
     
     # --- MÉTRICAS ADICIONALES (SOLICITADAS) ---
     
@@ -550,7 +675,9 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ TABLA_CREADORES_BODY }}': creadores_body,
         '{{ LISTA_RECOMENDACIONES }}': '<li>Reducir el backlog de órdenes pendientes.</li><li>Investigar casos de reincidencia para mejora de procesos.</li>',
         '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}%.",
-        '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina"
+        '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina",
+        '{{ COMPARATIVA_HEADERS }}': comparativa_headers,
+        '{{ TABLA_COMPARATIVA_BODY }}': tabla_comparativa_body
     }
 
 

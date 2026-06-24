@@ -369,6 +369,26 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     charts['tipo_orden_bar.png'] = fig_to_base64(fig)
     plt.close()
 
+    # 5.1 tipo_orden_pie.png (NUEVO)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    total_to = to_counts.sum()
+    
+    def autopct_format(pct, allvals):
+        absolute = int(round(pct/100.*np.sum(allvals)))
+        return f"{absolute}, {pct:.0f}%" if pct > 0 else ""
+        
+    wedges, texts, autotexts = ax.pie(to_counts.values, autopct=lambda pct: autopct_format(pct, to_counts.values),
+                                      textprops=dict(color="#333", fontsize=9, fontweight='bold'), colors=list(TAB20_COLORS), startangle=90, counterclock=False)
+    ax.legend(wedges, to_counts.index,
+              title="Tipo de orden",
+              loc="center left",
+              bbox_to_anchor=(1, 0, 0.5, 1),
+              fontsize=9)
+    ax.set_title("Total", fontweight="bold", fontsize=14)
+    plt.tight_layout()
+    charts['tipo_orden_pie.png'] = fig_to_base64(fig)
+    plt.close()
+
     # 6. solicitud_bar.png
     fig, ax = plt.subplots(figsize=(12, 6))
     bars = ax.bar(range(len(s_counts)), s_counts.values, color=COLORS_DICT['secondary'])
@@ -520,6 +540,12 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         tipo_body += format_html_table_row([n, c, f"{(c/TOTAL_ORDENES*100):.2f}%"])
     tipo_body += format_html_table_row(["<strong>TOTAL</strong>", TOTAL_ORDENES, "100%"], is_total=True)
     
+    # Nueva tabla tipo de orden según requerimiento
+    tabla_tipo_orden_nueva_body = ""
+    for n, c in to_counts.items():
+        tabla_tipo_orden_nueva_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px;">{n}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{c}</td></tr>\n'
+    tabla_tipo_orden_nueva_body += f'<tr style="font-weight: bold; background-color: #E2EFDA;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{total_to}</td></tr>\n'
+    
     estado_body = ""
     for n, c in df['Estado'].value_counts().items():
         n_lower = n.lower()
@@ -657,6 +683,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ CONCLUSIONES_SOLUCIONES }}': f'• <strong>Tasa de resolución:</strong> {tasa_resolucion:.2f}% ({ordenes_con_solucion} de {TOTAL_ORDENES} órdenes)',
         '{{ TABLA_CLASIFICACION_BODY }}': class_body,
         '{{ TABLA_TIPO_ORDEN_BODY }}': tipo_body,
+        '{{ TABLA_TIPO_ORDEN_NUEVA_BODY }}': tabla_tipo_orden_nueva_body,
         '{{ TABLA_ESTADO_BODY }}': estado_body,
         '{{ ORDENES_CON_TIEMPO_VALIDO }}': str(ordenes_con_tiempo_valido),
         '{{ MEDIANA_TIEMPO }}': f"{mediana_tiempo:.2f}",

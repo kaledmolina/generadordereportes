@@ -670,31 +670,7 @@
 <body>
     <div class="report-container">
 
-    <!-- =============================================== -->
-    <!-- PAGE 0: COMPARATIVA MULTIMES -->
-    <!-- =============================================== -->
-    <div class="page" id="page-0">
-        <div class="page-header">
-            <div class="page-header-title">Métricas Comparativas Históricas</div>
-        </div>
 
-        <h1>Desempeño y Días de Ejecución</h1>
-        <p>A continuación se muestra el análisis comparativo del tiempo de ejecución de las órdenes de los últimos meses, detallando el número de días transcurridos para su atención.</p>
-
-        <div style="margin-top: 30px; overflow-x: auto;">
-            <table style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-size: 9pt;">
-                <thead>
-                    <tr style="background-color: #1C3557; color: white;">
-                        <th class="text-center" style="width: 15%; border: 1px solid #000; vertical-align: middle;">DÍAS DE EJECUCIÓN</th>
-                        {{ COMPARATIVA_HEADERS }}
-                    </tr>
-                </thead>
-                <tbody>
-                    {{ TABLA_COMPARATIVA_BODY }}
-                </tbody>
-            </table>
-        </div>
-    </div>
 
     <!-- =============================================== -->
     <!-- PAGE 1: MODO EJECUTIVO (ONE-PAGER) -->
@@ -789,6 +765,37 @@
         <div class="page-footer">
             <div>{{ FOOTER_TEXT }}</div>
             <div>Página 1 de 15</div>
+        </div>
+    </div>
+
+    <!-- =============================================== -->
+    <!-- PAGE X: COMPARATIVA MULTIMES -->
+    <!-- =============================================== -->
+    <div class="page" id="page-0">
+        <div class="page-header">
+            <div class="page-header-title">Métricas Comparativas Históricas</div>
+        </div>
+
+        <h1>Desempeño y Días de Ejecución</h1>
+        <p>A continuación se muestra el análisis comparativo del tiempo de ejecución de las órdenes de los últimos meses, detallando el número de días transcurridos para su atención.</p>
+
+        <div style="margin-top: 30px; overflow-x: auto;">
+            <table style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-size: 9pt;">
+                <thead>
+                    <tr style="background-color: #1C3557; color: white;">
+                        <th class="text-center" style="width: 15%; border: 1px solid #000; vertical-align: middle;">DÍAS DE EJECUCIÓN</th>
+                        {{ COMPARATIVA_HEADERS }}
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ TABLA_COMPARATIVA_BODY }}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="page-footer">
+            <div>{{ FOOTER_TEXT }}</div>
+            <div>Página 2 de 16</div>
         </div>
     </div>
 

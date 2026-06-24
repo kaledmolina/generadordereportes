@@ -579,6 +579,35 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
             
     tabla_tecnico_solucion_body += f'<tr style="font-weight: bold; background-color: #DDEBF7;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{TOTAL_ORDENES}</td></tr>\n'
 
+    # Nueva tabla TIPO ORDEN -> ZONA -> BARRIO
+    tabla_tipo_zona_barrio_body = ""
+    # Agrupar por Tipo Orden, ordenar alfabéticamente
+    for t_orden in sorted(tipo_totales.index):
+        t_count = tipo_totales[t_orden]
+        tabla_tipo_zona_barrio_body += f'<tr style="font-weight: bold;"><td style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">&#9634; {t_orden}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">{t_count}</td></tr>\n'
+        
+        df_t = df[df['Tipo Orden'] == t_orden]
+        # Para evitar errores con valores nulos, llenarlos con 'Sin Zona'
+        df_t_zona = df_t.copy()
+        df_t_zona['Zona Cliente'] = df_t_zona['Zona Cliente'].fillna('Sin Zona')
+        zona_totales = df_t_zona['Zona Cliente'].value_counts()
+        
+        for zona in sorted(zona_totales.index):
+            z_count = zona_totales[zona]
+            tabla_tipo_zona_barrio_body += f'<tr style="font-weight: bold;"><td style="border: 1px solid #ccc; padding: 5px; padding-left: 20px;">&#9634; {zona}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{z_count}</td></tr>\n'
+            
+            df_z = df_t_zona[df_t_zona['Zona Cliente'] == zona]
+            # Para evitar errores con barrios nulos
+            df_z_barrio = df_z.copy()
+            df_z_barrio['Barrio'] = df_z_barrio['Barrio'].fillna('Sin Barrio')
+            barrio_counts = df_z_barrio['Barrio'].value_counts()
+            
+            for barrio, b_count in barrio_counts.items():
+                tabla_tipo_zona_barrio_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px; padding-left: 40px;">{barrio}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{b_count}</td></tr>\n'
+                
+    tabla_tipo_zona_barrio_body += f'<tr style="font-weight: bold; background-color: #DDEBF7;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{TOTAL_ORDENES}</td></tr>\n'
+
+
 
     
     estado_body = ""
@@ -721,6 +750,7 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
         '{{ TABLA_TIPO_ORDEN_NUEVA_BODY }}': tabla_tipo_orden_nueva_body,
         '{{ TABLA_TIPO_SOLUCION_BODY }}': tabla_tipo_solucion_body,
         '{{ TABLA_TECNICO_SOLUCION_BODY }}': tabla_tecnico_solucion_body,
+        '{{ TABLA_TIPO_ZONA_BARRIO_BODY }}': tabla_tipo_zona_barrio_body,
         '{{ TABLA_ESTADO_BODY }}': estado_body,
         '{{ ORDENES_CON_TIEMPO_VALIDO }}': str(ordenes_con_tiempo_valido),
         '{{ MEDIANA_TIEMPO }}': f"{mediana_tiempo:.2f}",

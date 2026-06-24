@@ -566,13 +566,13 @@ def generate_report_from_df(df, template_path='reporte_template.html'):
     # Nueva tabla TECNICO Y SOLUCION
     tabla_tecnico_solucion_body = ""
     # Asegurarnos de que Técnico no tenga nulos (por si acaso) y agrupar
-    tecnico_totales = df['Técnico'].value_counts()
+    tecnico_totales = df['Técnico Principal'].value_counts()
     for tecnico in sorted(tecnico_totales.index):
         t_count = tecnico_totales[tecnico]
         tabla_tecnico_solucion_body += f'<tr style="font-weight: bold;"><td style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">&#9634; {tecnico}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px; background-color: #f9f9f9;">{t_count}</td></tr>\n'
         
         # Obtener soluciones para este técnico, ordenadas por cantidad descendente
-        df_tec = df[df['Técnico'] == tecnico]
+        df_tec = df[df['Técnico Principal'] == tecnico]
         sol_tec_counts = df_tec['Solución Técnico'].value_counts()
         for sol, s_count in sol_tec_counts.items():
             tabla_tecnico_solucion_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px; padding-left: 30px;">{sol}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{s_count}</td></tr>\n'

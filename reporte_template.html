@@ -1042,50 +1042,6 @@
     </div>
 
     <!-- =============================================== -->
-    <!-- PAGE 2: ÓRDENES POR BARRIO -->
-    <!-- =============================================== -->
-    <div class="page" id="page-5">
-        <div class="page-header">
-            <div class="page-header-title">{{ REPORTE_HEADER_TITLE }}</div>
-        </div>
-
-        <h1>Órdenes de Servicio por Barrio</h1>
-        <p>Distribución geográfica de las <span class="highlight">{{ TOTAL_ORDENES }} órdenes de servicio</span>
-            atendidas en el período. Los barrios con mayor concentración de solicitudes se presentan en orden
-            descendente.</p>
-
-        <div class="chart-container">
-            <img src="charts/barrios_bar.png" alt="Top Barrios">
-            <p class="caption">Figura 3: Top 15 Barrios con Mayor Volumen de Órdenes</p>
-        </div>
-
-        <h2>Top 20 Barrios por Volumen</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 8%;">#</th>
-                    <th style="width: 50%;">Barrio</th>
-                    <th class="text-center" style="width: 20%;">Cantidad</th>
-                    <th class="text-center" style="width: 22%;">Porcentaje</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{ TABLA_BARRIOS_BODY }}
-            </tbody>
-        </table>
-        <p class="caption">Tabla 1: Top 20 Barrios por Volumen de Órdenes</p>
-
-        <div class="callout">
-            {{ NOTA_BARRIOS }}
-        </div>
-
-        <div class="page-footer">
-            <div>{{ FOOTER_TEXT }}</div>
-            <div>Página 4 de 15</div>
-        </div>
-    </div>
-
-    <!-- =============================================== -->
     <!-- PAGE 3: REPORTE POR TÉCNICO -->
     <!-- =============================================== -->
     <div class="page" id="page-6">

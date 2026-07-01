@@ -41,7 +41,9 @@ def format_html_table_row(cells, is_total=False, aligns=None):
     html += '</tr>'
     return html
 
-def generate_report_from_df(df, template_path='reporte_template.html'):
+def generate_report_from_df(df, template_path=None):
+    if template_path is None:
+        template_path = os.path.join(os.path.dirname(__file__), 'reporte_template.html')
     # Inicialmente el DataFrame puede tener varios meses
     
     # --- PROCESAMIENTO DE DATOS (Lógica de generate_complete_report_data.py) ---

@@ -605,7 +605,16 @@ def generate_report_from_df(df, template_path=None):
             barrio_counts = df_z_barrio['Barrio'].value_counts()
             
             for barrio, b_count in barrio_counts.items():
-                tabla_tipo_zona_barrio_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px; padding-left: 40px;">{barrio}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{b_count}</td></tr>\n'
+                tabla_tipo_zona_barrio_body += f'<tr style="font-weight: bold; color: #333;"><td style="border: 1px solid #ccc; padding: 5px; padding-left: 40px;">&#9634; {barrio}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{b_count}</td></tr>\n'
+                
+                # Desglose por Solicitud Suscriptor
+                df_b = df_z_barrio[df_z_barrio['Barrio'] == barrio]
+                df_b_solicitudes = df_b.copy()
+                df_b_solicitudes['Solicitud Suscriptor'] = df_b_solicitudes['Solicitud Suscriptor'].fillna('Sin Solicitud')
+                solicitud_counts = df_b_solicitudes['Solicitud Suscriptor'].value_counts()
+                
+                for solicitud, s_count in solicitud_counts.items():
+                    tabla_tipo_zona_barrio_body += f'<tr><td style="border: 1px solid #ccc; padding: 5px; padding-left: 60px; color: #555; font-size: 0.9em;">- {solicitud}</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px; color: #555; font-size: 0.9em;">{s_count}</td></tr>\n'
                 
     tabla_tipo_zona_barrio_body += f'<tr style="font-weight: bold; background-color: #DDEBF7;"><td style="border: 1px solid #ccc; padding: 5px;">Total general</td><td class="text-right" style="border: 1px solid #ccc; padding: 5px;">{TOTAL_ORDENES}</td></tr>\n'
 

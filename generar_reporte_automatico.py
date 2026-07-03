@@ -47,8 +47,8 @@ def generate_report_from_df(df, template_path=None):
     # Inicialmente el DataFrame puede tener varios meses
     
     # --- PROCESAMIENTO DE DATOS (Lógica de generate_complete_report_data.py) ---
-    df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce', dayfirst=True)
-    df['Fecha Fin Atención'] = pd.to_datetime(df['Fecha Fin Atención'], errors='coerce', dayfirst=True)
+    df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce')
+    df['Fecha Fin Atención'] = pd.to_datetime(df['Fecha Fin Atención'], errors='coerce')
     
     # Rellenar vacíos EXACTAMENTE como en generate_complete_report_data.py
     df['Barrio'] = df['Barrio'].fillna('SIN BARRIO').str.strip().replace('', 'SIN BARRIO')

@@ -47,8 +47,8 @@ def generate_report_from_df(df, template_path=None):
     # Inicialmente el DataFrame puede tener varios meses
     
     # --- PROCESAMIENTO DE DATOS (Lógica de generate_complete_report_data.py) ---
-    df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce')
-    df['Fecha Fin Atención'] = pd.to_datetime(df['Fecha Fin Atención'], errors='coerce')
+    df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce', dayfirst=True)
+    df['Fecha Fin Atención'] = pd.to_datetime(df['Fecha Fin Atención'], errors='coerce', dayfirst=True)
     
     # Rellenar vacíos EXACTAMENTE como en generate_complete_report_data.py
     df['Barrio'] = df['Barrio'].fillna('SIN BARRIO').str.strip().replace('', 'SIN BARRIO')
@@ -737,16 +737,24 @@ def generate_report_from_df(df, template_path=None):
     hallazgo_principal = f"Se logró una tasa de resolución del {tasa_resolucion:.2f}% (con {ordenes_anuladas} órdenes anuladas y {ordenes_pendientes} órdenes pendientes)."
 
     # Extraer periodo dinámicamente
+    import calendar
     meses = {1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril', 5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto', 9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'}
     try:
-        valid_dates = df['Fecha Creación'].dropna()
-        min_date = valid_dates.min()
-        max_date = valid_dates.max()
-        periodo_texto = f"{min_date.day} de {meses[min_date.month]} al {max_date.day} de {meses[max_date.month]} de {max_date.year}"
-        solo_mes = f"{meses[min_date.month].capitalize()} {min_date.year}"
+        if ultimo_mes is not None:
+            mes = ultimo_mes.month
+            anio = ultimo_mes.year
+            ultimo_dia = calendar.monthrange(anio, mes)[1]
+            periodo_texto = f"1 de {meses[mes]} al {ultimo_dia} de {meses[mes]} de {anio}"
+            solo_mes = f"{meses[mes].capitalize()} {anio}"
+        else:
+            valid_dates = df['Fecha Creación'].dropna()
+            min_date = valid_dates.min()
+            max_date = valid_dates.max()
+            periodo_texto = f"{min_date.day} de {meses[min_date.month]} al {max_date.day} de {meses[max_date.month]} de {max_date.year}"
+            solo_mes = f"{meses[min_date.month].capitalize()} {min_date.year}"
     except:
-        periodo_texto = "1 al 30 de abril de 2026"
-        solo_mes = "Abril 2026"
+        periodo_texto = "1 al 31 de mayo de 2026"
+        solo_mes = "Mayo 2026"
 
     replacements = {
         '{{ EQUIPOS_CAMBIOS_COUNT }}': str(total_eq_orders),

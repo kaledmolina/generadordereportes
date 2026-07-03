@@ -491,7 +491,7 @@ def generate_report_from_df(df, template_path=None):
     # KPI
     kpi_body = ""
     kpi_body += format_html_table_row(["Tasa de Cierre", f"<strong>{tasa_cierre:.2f}%</strong>", f"{ordenes_cerradas} de {TOTAL_ORDENES} órdenes cerradas exitosamente"], aligns=["", "text-center", "text-left"])
-    kpi_body += format_html_table_row(["Tasa de Resolución", f"<strong>{tasa_resolucion:.2f}%</strong>", f"{ordenes_con_solucion} de {TOTAL_ORDENES} órdenes con solución aplicada (Cerradas/Ejecutadas)"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Tasa de Resolución", f"<strong>{tasa_resolucion:.2f}%</strong>", f"{ordenes_con_solucion} de {TOTAL_ORDENES} órdenes con solución (Cerradas/Ejecutadas). Nota: Hay {ordenes_anuladas} órdenes anuladas"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Órdenes sin Solución", f"<strong>{ordenes_sin_solucion}</strong>", f"{(ordenes_sin_solucion/TOTAL_ORDENES*100):.2f}% del total (requiere seguimiento)"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Barrios Atendidos", f"<strong>{barrios_unicos}</strong>", "Cobertura geográfica completa"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Tiempo Promedio", f"<strong>{tiempo_promedio:.2f} hrs</strong>", f"Mediana: {mediana_tiempo:.2f} horas"], aligns=["", "text-center", "text-left"])
@@ -733,7 +733,7 @@ def generate_report_from_df(df, template_path=None):
         <strong>5. Tiempos:</strong> Promedio de <strong>{tiempo_promedio:.2f} horas</strong> por atención.
     """
 
-    hallazgo_principal = f"Se logró una tasa de resolución del {tasa_resolucion:.2f}% con {ordenes_pendientes} órdenes pendientes."
+    hallazgo_principal = f"Se logró una tasa de resolución del {tasa_resolucion:.2f}% (con {ordenes_anuladas} órdenes anuladas y {ordenes_pendientes} órdenes pendientes)."
 
     # Extraer periodo dinámicamente
     meses = {1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril', 5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto', 9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'}
@@ -774,7 +774,7 @@ def generate_report_from_df(df, template_path=None):
         '{{ TABLA_TECNICOS_BODY }}': tecnicos_body,
         '{{ ANALISIS_RENDIMIENTO_TECNICO }}': f'• <strong>{top_t}</strong> lidera con {top_t_o} órdenes ({top_t_p:.2f}%) y el menor tiempo promedio ({top_t_t:.2f} hrs)<br>• Los técnicos principales atienden la gran mayoría de las solicitudes.',
         '{{ TABLA_SOLUCIONES_BODY }}': sol_body,
-        '{{ CONCLUSIONES_SOLUCIONES }}': f'• <strong>Tasa de resolución:</strong> {tasa_resolucion:.2f}% ({ordenes_con_solucion} de {TOTAL_ORDENES} órdenes)',
+        '{{ CONCLUSIONES_SOLUCIONES }}': f'• <strong>Tasa de resolución:</strong> {tasa_resolucion:.2f}% ({ordenes_con_solucion} de {TOTAL_ORDENES} órdenes. Nota: {ordenes_anuladas} órdenes anuladas)',
         '{{ TABLA_CLASIFICACION_BODY }}': class_body,
         '{{ TABLA_TIPO_ORDEN_BODY }}': tipo_body,
         '{{ TABLA_TIPO_ORDEN_NUEVA_BODY }}': tabla_tipo_orden_nueva_body,
@@ -799,7 +799,7 @@ def generate_report_from_df(df, template_path=None):
         '{{ TABLA_REINCIDENCIA_BODY }}': reincidencia_history_body,
         '{{ TABLA_CREADORES_BODY }}': creadores_body,
         '{{ LISTA_RECOMENDACIONES }}': '<li>Reducir el backlog de órdenes pendientes.</li><li>Investigar casos de reincidencia para mejora de procesos.</li>',
-        '{{ CLASIFICACION_GENERAL }}': f"El departamento de operaciones técnicas demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}%.",
+        '{{ CLASIFICACION_GENERAL }}': f"El departamento demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}% (considerando {ordenes_anuladas} órdenes anuladas).",
         '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina",
         '{{ COMPARATIVA_HEADERS }}': comparativa_headers,
         '{{ TABLA_COMPARATIVA_BODY }}': tabla_comparativa_body

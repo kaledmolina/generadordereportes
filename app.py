@@ -20,10 +20,18 @@ def generate():
     if file.filename == '':
         return "Nombre de archivo vacío", 400
     
-    if file and file.filename.endswith('.xlsx'):
+    fname_lower = file.filename.lower()
+    if file and (fname_lower.endswith('.xlsx') or fname_lower.endswith('.xls') or fname_lower.endswith('.csv')):
         try:
-            # Leer el excel directamente de la memoria
-            df = pd.read_excel(file)
+            # Leer el excel o csv directamente de la memoria
+            if fname_lower.endswith('.csv'):
+                try:
+                    df = pd.read_csv(file, encoding='utf-8')
+                except UnicodeDecodeError:
+                    file.seek(0)
+                    df = pd.read_csv(file, encoding='latin-1', sep=None, engine='python')
+            else:
+                df = pd.read_excel(file)
             
             # Generar el reporte
             report_html = generate_report_from_df(df)
@@ -33,7 +41,7 @@ def generate():
         except Exception as e:
             return f"Error procesando el archivo: {str(e)}", 500
     
-    return "Formato de archivo no soportado (debe ser .xlsx)", 400
+    return "Formato de archivo no soportado (debe ser .xlsx, .xls o .csv)", 400
 
 @app.route('/download', methods=['POST'])
 def download():

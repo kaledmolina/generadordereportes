@@ -41,25 +41,207 @@ def format_html_table_row(cells, is_total=False, aligns=None):
     html += '</tr>'
     return html
 
+import re
+import unicodedata
+
+def clean_text_repr(val):
+    if not isinstance(val, str):
+        return ""
+    val = unicodedata.normalize('NFKD', str(val)).encode('ASCII', 'ignore').decode('utf-8')
+    val = re.sub(r'[^a-zA-Z0-9\s]', ' ', val).lower().strip()
+    return re.sub(r'\s+', ' ', val)
+
+def normalize_dataframe_columns(df):
+    """
+    Normaliza los nombres de las columnas del DataFrame para ser tolerante a:
+    - Mayúsculas/minúsculas
+    - Tildes / acentos ausentes o caracteres con encoding corrupto
+    - Espacios extra al inicio/final o entre palabras
+    - Variaciones de nombres (ej. 'Fecha Creacion', 'Fecha de Creacion', etc.)
+    - Filas de encabezado desplazadas por títulos superiores
+    - Columnas opcionales ausentes
+    """
+    df = df.copy()
+    
+    # 1. Si los encabezados están en una fila posterior debido a títulos superiores
+    def count_known_columns(cols):
+        cleaned = [clean_text_repr(str(c)) for c in cols]
+        score = 0
+        keywords = ['fecha', 'orden', 'estado', 'cliente', 'tecnico', 'solicitud', 'barrio', 'clasificacion', 'creador', 'solucion']
+        for c in cleaned:
+            for kw in keywords:
+                if kw in c:
+                    score += 1
+                    break
+        return score
+
+    if count_known_columns(df.columns) < 2:
+        for i in range(min(10, len(df))):
+            row_vals = df.iloc[i].tolist()
+            if count_known_columns(row_vals) >= 2:
+                df.columns = [str(x).strip() if pd.notna(x) else f"Col_{j}" for j, x in enumerate(row_vals)]
+                df = df.iloc[i+1:].reset_index(drop=True)
+                break
+                
+    # 2. Mapeo de patrones de columnas canónicas
+    COLUMN_MAPPINGS = {
+        'Fecha Creación': [
+            'fecha creacion', 'fecha de creacion', 'fecha creacion hora', 'f creacion', 'f_creacion',
+            'fechacreacion', 'fecha registro', 'fecha creaci n', 'fecha creacin', 'fecha creacion', 'fecha creación'
+        ],
+        'Fecha Fin Atención': [
+            'fecha fin atencion', 'fecha fin de atencion', 'fecha atencion', 'fecha fin', 
+            'fecha solucion', 'fecha resolucion', 'fecha fin atenci n', 'fecha cierre', 'fechafin',
+            'fecha fin atencion', 'fecha fin atención'
+        ],
+        'Fecha Asignación': ['fecha asignacion', 'fecha de asignacion', 'f asignacion', 'fecha asignaci n', 'fecha asignacion'],
+        'Fecha Inicio Atención': ['fecha inicio atencion', 'fecha inicio', 'fecha inicio atenci n', 'fecha inicio atencion'],
+        'Fecha Cierre': ['fecha cierre', 'fecha de cierre'],
+        'N° Orden': ['n orden', 'no orden', 'numero orden', 'numero de orden', 'orden', 'id orden', 'id_orden', 'n  orden', 'n orden', 'num orden', 'n de orden'],
+        'Barrio': ['barrio', 'barrio cliente', 'barrio suscriptor', 'vecindario', 'sector barrio'],
+        'Técnico Principal': ['tecnico principal', 'tecnico', 'nombre tecnico', 'responsable', 'tecnico asignado', 't cnico principal', 'tcnico principal', 'cuadrilla'],
+        'Técnico Auxiliar': ['tecnico auxiliar', 'auxiliar', 't cnico auxiliar', 'tcnico auxiliar'],
+        'Solución Técnico': ['solucion tecnico', 'solucion', 'solucion tecnica', 'tipo solucion', 'soluci n t cnico', 'solucion dada', 'solucion final'],
+        'Clasificación': ['clasificacion', 'tipo clasificacion', 'clasificaci n', 'categoria'],
+        'Tipo Orden': ['tipo orden', 'tipo de orden', 'tipo', 'tipo_orden'],
+        'Estado': ['estado', 'estado orden', 'estado actual', 'status'],
+        'Estado Interno': ['estado interno', 'status interno'],
+        'Solicitud Suscriptor': ['solicitud suscriptor', 'solicitud', 'tipo solicitud', 'motivo', 'solicitud cliente', 'problema', 'falla'],
+        'Zona Cliente': ['zona cliente', 'zona', 'region', 'sector', 'zona suscriptor'],
+        'Creador': ['creador', 'creado por', 'usuario creador', 'agente creador', 'usuario'],
+        'Valor Total': ['valor total', 'valor', 'total', 'precio', 'costo', 'valor orden'],
+        'Código': ['codigo', 'cod suscriptor', 'codigo suscriptor', 'id suscriptor', 'c digo', 'codigo cliente', 'contrato'],
+        'Cliente': ['cliente', 'nombre cliente', 'nombre suscriptor', 'suscriptor', 'usuario cliente'],
+        'Dirección': ['direccion', 'direccion cliente', 'direcci n', 'domicilio'],
+        'Teléfono': ['telefono', 'telefono cliente', 'celular', 'tel fono', 'movil'],
+        'Cédula': ['cedula', 'cedula cliente', 'c dula', 'identificacion', 'documento', 'nit', 'cc']
+    }
+    
+    # Renombrar columnas encontradas con prioridad en coincidencias exactas
+    current_cols = list(df.columns)
+    rename_dict = {}
+    used_canonicals = set()
+    
+    # Paso 1: Coincidencias exactas
+    for col in current_cols:
+        col_str = str(col).strip()
+        cleaned = clean_text_repr(col_str)
+        
+        for canonical, aliases in COLUMN_MAPPINGS.items():
+            if canonical in used_canonicals:
+                continue
+            canonical_clean = clean_text_repr(canonical)
+            cleaned_aliases = [clean_text_repr(a) for a in aliases]
+            
+            if cleaned == canonical_clean or cleaned in cleaned_aliases:
+                rename_dict[col] = canonical
+                used_canonicals.add(canonical)
+                break
+                
+    # Paso 2: Coincidencias por prefijo / inclusión controlada solo para columnas no asignadas
+    for col in current_cols:
+        if col in rename_dict:
+            continue
+        col_str = str(col).strip()
+        cleaned = clean_text_repr(col_str)
+        
+        for canonical, aliases in COLUMN_MAPPINGS.items():
+            if canonical in used_canonicals:
+                continue
+            cleaned_aliases = [clean_text_repr(a) for a in aliases]
+            matched = False
+            for a in cleaned_aliases:
+                # Solo si empieza por el alias o contiene la frase completa
+                if len(a) >= 5 and (cleaned.startswith(a) or a == cleaned):
+                    matched = True
+                    break
+            if matched:
+                rename_dict[col] = canonical
+                used_canonicals.add(canonical)
+                break
+            
+    df = df.rename(columns=rename_dict)
+    
+    # Descartar columnas duplicadas si las hubiere
+    df = df.loc[:, ~df.columns.duplicated(keep='first')]
+    
+    # Si después del mapeo no encontramos 'Fecha Creación', intentar buscar cualquier columna con fecha o creac
+    if 'Fecha Creación' not in df.columns:
+        for c in df.columns:
+            c_clean = clean_text_repr(str(c))
+            if 'creac' in c_clean or ('fecha' in c_clean and 'fin' not in c_clean and 'cierr' not in c_clean and 'asig' not in c_clean and 'inic' not in c_clean):
+                df = df.rename(columns={c: 'Fecha Creación'})
+                break
+                
+    if 'Fecha Creación' not in df.columns:
+        # Si aún no se encuentra, buscar la primera columna que tenga fechas válidas
+        for c in df.columns:
+            try:
+                converted = pd.to_datetime(df[c], errors='coerce')
+                if converted.notna().sum() > len(df) * 0.3:  # más del 30% son fechas válidas
+                    df = df.rename(columns={c: 'Fecha Creación'})
+                    break
+            except Exception:
+                continue
+
+    if 'Fecha Creación' not in df.columns:
+        cols_str = ", ".join([f"'{c}'" for c in df.columns])
+        raise KeyError(
+            f"No se encontró la columna de fecha de creación ('Fecha Creación') en el archivo. "
+            f"Columnas detectadas en el archivo: [{cols_str}]. "
+            f"Por favor asegúrate de que el Excel contenga una columna de fecha."
+        )
+        
+    # Inicializar columnas por defecto si no existen
+    defaults = {
+        'Fecha Fin Atención': pd.NaT,
+        'Barrio': 'SIN BARRIO',
+        'Técnico Principal': 'SIN ASIGNAR',
+        'Solución Técnico': 'SIN SOLUCIÓN',
+        'Clasificación': 'OTROS',
+        'Tipo Orden': 'OTROS',
+        'Estado': 'OTROS',
+        'Solicitud Suscriptor': 'OTROS',
+        'Zona Cliente': 'SIN ZONA',
+        'Creador': 'SISTEMA/OTROS',
+        'Valor Total': 0,
+        'N° Orden': range(1, len(df) + 1),
+        'Código': df.get('Cliente', range(1, len(df) + 1)),
+        'Cliente': 'CLIENTE GENERAL',
+        'Dirección': 'SIN DIRECCIÓN',
+        'Teléfono': 'SIN TELÉFONO'
+    }
+    
+    for col_name, default_val in defaults.items():
+        if col_name not in df.columns:
+            if isinstance(default_val, range):
+                df[col_name] = list(default_val)
+            else:
+                df[col_name] = default_val
+
+    return df
+
 def generate_report_from_df(df, template_path=None):
     if template_path is None:
         template_path = os.path.join(os.path.dirname(__file__), 'reporte_template.html')
-    # Inicialmente el DataFrame puede tener varios meses
     
-    # --- PROCESAMIENTO DE DATOS (Lógica de generate_complete_report_data.py) ---
+    # Normalizar columnas de forma robusta
+    df = normalize_dataframe_columns(df)
+    
+    # --- PROCESAMIENTO DE DATOS ---
     df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce')
     df['Fecha Fin Atención'] = pd.to_datetime(df['Fecha Fin Atención'], errors='coerce')
     
-    # Rellenar vacíos EXACTAMENTE como en generate_complete_report_data.py
-    df['Barrio'] = df['Barrio'].fillna('SIN BARRIO').str.strip().replace('', 'SIN BARRIO')
-    df['Técnico Principal'] = df['Técnico Principal'].fillna('SIN ASIGNAR').str.strip().replace('', 'SIN ASIGNAR')
-    df['Solución Técnico'] = df['Solución Técnico'].fillna('SIN SOLUCIÓN').str.strip().replace('', 'SIN SOLUCIÓN')
-    df['Clasificación'] = df['Clasificación'].fillna('OTROS').str.strip().replace('', 'OTROS')
-    df['Tipo Orden'] = df['Tipo Orden'].fillna('OTROS').str.strip().replace('', 'OTROS')
-    df['Estado'] = df['Estado'].fillna('OTROS').str.strip().replace('', 'OTROS')
-    df['Solicitud Suscriptor'] = df['Solicitud Suscriptor'].fillna('OTROS').str.strip().replace('', 'OTROS')
-    df['Zona Cliente'] = df['Zona Cliente'].fillna('SIN ZONA').str.strip().replace('', 'SIN ZONA')
-    df['Creador'] = df['Creador'].fillna('SISTEMA/OTROS').str.strip().replace('', 'SISTEMA/OTROS')
+    # Rellenar vacíos de forma segura
+    df['Barrio'] = df['Barrio'].fillna('SIN BARRIO').astype(str).str.strip().replace('', 'SIN BARRIO')
+    df['Técnico Principal'] = df['Técnico Principal'].fillna('SIN ASIGNAR').astype(str).str.strip().replace('', 'SIN ASIGNAR')
+    df['Solución Técnico'] = df['Solución Técnico'].fillna('SIN SOLUCIÓN').astype(str).str.strip().replace('', 'SIN SOLUCIÓN')
+    df['Clasificación'] = df['Clasificación'].fillna('OTROS').astype(str).str.strip().replace('', 'OTROS')
+    df['Tipo Orden'] = df['Tipo Orden'].fillna('OTROS').astype(str).str.strip().replace('', 'OTROS')
+    df['Estado'] = df['Estado'].fillna('OTROS').astype(str).str.strip().replace('', 'OTROS')
+    df['Solicitud Suscriptor'] = df['Solicitud Suscriptor'].fillna('OTROS').astype(str).str.strip().replace('', 'OTROS')
+    df['Zona Cliente'] = df['Zona Cliente'].fillna('SIN ZONA').astype(str).str.strip().replace('', 'SIN ZONA')
+    df['Creador'] = df['Creador'].fillna('SISTEMA/OTROS').astype(str).str.strip().replace('', 'SISTEMA/OTROS')
     df['Valor Total'] = pd.to_numeric(df['Valor Total'], errors='coerce').fillna(0)
 
     # Tiempos

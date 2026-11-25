@@ -723,7 +723,7 @@
         <p>Este reporte mensual presenta un análisis completo y detallado de las <span class="highlight">{{ TOTAL_ORDENES }}
                 órdenes de servicio</span> atendidas durante el período del <strong>{{ PERIODO_TEXTO }}</strong>.</p>
 
-        <div class="stats-grid">
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
             <div class="stat-box">
                 <div class="stat-value">{{ TOTAL_ORDENES }}</div>
                 <div class="stat-label">Total Órdenes</div>
@@ -733,20 +733,12 @@
                 <div class="stat-label">Cerradas</div>
             </div>
             <div class="stat-box blue">
-                <div class="stat-value">{{ ORDENES_EJECUTADAS }}</div>
-                <div class="stat-label">Ejecutadas</div>
-            </div>
-            <div class="stat-box blue">
                 <div class="stat-value">{{ TECNICOS_ACTIVOS }}</div>
                 <div class="stat-label">Técnicos</div>
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-box orange">
-                <div class="stat-value">{{ ORDENES_REPROGRAMADAS }}</div>
-                <div class="stat-label">Reprogramadas</div>
-            </div>
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
             <div class="stat-box red">
                 <div class="stat-value">{{ ORDENES_ANULADAS }}</div>
                 <div class="stat-label">Anuladas</div>
@@ -1270,12 +1262,12 @@
                 <div class="stat-label">% del Total de Órdenes</div>
             </div>
             <div class="stat-box orange">
-                <div class="stat-value">{{ EQUIPOS_DEFECTUOSOS_COUNT }}</div>
-                <div class="stat-label">Equipos Defectuosos (Cód. 7)</div>
+                <div class="stat-value">{{ EQUIPOS_COD3_COUNT }}</div>
+                <div class="stat-label">Cambio de Equipo (Cód. 3)</div>
             </div>
             <div class="stat-box red">
-                <div class="stat-value">{{ EQUIPOS_QUEMADOS_COUNT }}</div>
-                <div class="stat-label">Equipos Quemados (Cód. 8)</div>
+                <div class="stat-value">{{ EQUIPOS_BRIDGE_COUNT }}</div>
+                <div class="stat-label">Bridge / Router (Cód. 24)</div>
             </div>
         </div>
 
@@ -1304,8 +1296,8 @@
         <div class="callout highlight">
             <strong>Indicadores Clave del Inventario Reemplazado:</strong><br>
             • Los cambios de equipos representan el <strong>{{ PORCENTAJE_CAMBIOS_EQUIPOS }}%</strong> de todas las visitas técnicas.<br>
-            • Se identificaron un total de <strong>{{ EQUIPOS_DEFECTUOSOS_COUNT }} equipos defectuosos</strong> y <strong>{{ EQUIPOS_QUEMADOS_COUNT }} equipos quemados</strong>.<br>
-            • Los routers o bridges reemplazados (Código 24) sumaron <strong>{{ EQUIPOS_BRIDGE_COUNT }} unidades</strong>.
+            • Se registraron <strong>{{ EQUIPOS_COD3_COUNT }} cambios de equipo (Código 3)</strong> y <strong>{{ EQUIPOS_BRIDGE_COUNT }} cambios de bridge/router (Código 24)</strong>.<br>
+            • Además se identificaron <strong>{{ EQUIPOS_DEFECTUOSOS_COUNT }} equipos defectuosos (Código 7)</strong> y <strong>{{ EQUIPOS_QUEMADOS_COUNT }} equipos quemados (Código 8)</strong>.
         </div>
 
         <div class="page-footer">

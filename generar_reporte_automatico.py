@@ -114,7 +114,27 @@ def normalize_dataframe_columns(df):
         'Cliente': ['cliente', 'nombre cliente', 'nombre suscriptor', 'suscriptor', 'usuario cliente'],
         'Dirección': ['direccion', 'direccion cliente', 'direcci n', 'domicilio'],
         'Teléfono': ['telefono', 'telefono cliente', 'celular', 'tel fono', 'movil'],
-        'Cédula': ['cedula', 'cedula cliente', 'c dula', 'identificacion', 'documento', 'nit', 'cc']
+        'Cédula': ['cedula', 'cedula cliente', 'c dula', 'identificacion', 'documento', 'nit', 'cc'],
+        # --- Columnas del formato actualizado ---
+        'Tipo de Servicio': ['tipo de servicio', 'tipo servicio', 'tipo de servicio contratado'],
+        'Plan Internet': ['plan internet', 'plan de internet', 'plan contratado', 'nombre del plan'],
+        'Origen (Enlace/Manual)': ['origen enlace manual', 'origen de la orden', 'origen orden', 'origen'],
+        'Aplicado en Enlace': ['aplicado en enlace', 'aplicado enlace', 'aplicado'],
+        'Medio Solicitud': ['medio solicitud', 'medio de solicitud', 'canal de solicitud', 'canal'],
+        'Prioridad': ['prioridad', 'prioridad de la orden', 'prioridad orden'],
+        'Coordenadas': ['coordenadas', 'coordenada', 'ubicacion geografica', 'geolocalizacion'],
+        'Novedades NOC': ['novedades noc', 'novedad noc', 'novedades'],
+        'Observaciones': ['observaciones', 'observacion', 'notas de la orden', 'comentarios'],
+        'Vencimiento (SLA)': ['vencimiento sla', 'vencimiento de sla', 'vencimiento', 'fecha vencimiento'],
+        'Fecha Llegada': ['fecha llegada', 'fecha de llegada', 'hora de llegada'],
+        'Sede': ['sede', 'sede cliente', 'sede de la orden'],
+        'Vendedor': ['vendedor', 'asesor comercial', 'vendedor cliente', 'asesor'],
+        'Precinto': ['precinto', 'precintos'],
+        'Ubicación Fotos': ['ubicacion fotos', 'ubicacion foto', 'evidencia fotografica', 'fotos de la orden'],
+        'MAC Router': ['mac router', 'mac del router'],
+        'MAC Bridge': ['mac bridge', 'mac del bridge'],
+        'MAC ONT': ['mac ont', 'mac de la ont'],
+        'Otros Equipos': ['otros equipos', 'otro equipo', 'equipos adicionales']
     }
     
     # Renombrar columnas encontradas con prioridad en coincidencias exactas
@@ -209,7 +229,30 @@ def normalize_dataframe_columns(df):
         'Código': df.get('Cliente', range(1, len(df) + 1)),
         'Cliente': 'CLIENTE GENERAL',
         'Dirección': 'SIN DIRECCIÓN',
-        'Teléfono': 'SIN TELÉFONO'
+        'Teléfono': 'SIN TELÉFONO',
+        # Columnas nuevas del formato actualizado (vacías si el archivo no las trae)
+        'Fecha Asignación': pd.NaT,
+        'Fecha Inicio Atención': pd.NaT,
+        'Fecha Cierre': pd.NaT,
+        'Vencimiento (SLA)': pd.NaT,
+        'Fecha Llegada': pd.NaT,
+        'Tipo de Servicio': 'SIN DATO',
+        'Plan Internet': 'SIN DATO',
+        'Origen (Enlace/Manual)': 'SIN DATO',
+        'Aplicado en Enlace': 'SIN DATO',
+        'Medio Solicitud': 'SIN DATO',
+        'Prioridad': 'SIN DATO',
+        'Sede': 'SIN DATO',
+        'Vendedor': 'SIN DATO',
+        'Coordenadas': '',
+        'Novedades NOC': '',
+        'Observaciones': '',
+        'Precinto': '',
+        'Ubicación Fotos': '',
+        'MAC Router': '',
+        'MAC Bridge': '',
+        'MAC ONT': '',
+        'Otros Equipos': ''
     }
     
     for col_name, default_val in defaults.items():
@@ -231,6 +274,9 @@ def generate_report_from_df(df, template_path=None):
     # --- PROCESAMIENTO DE DATOS ---
     df['Fecha Creación'] = pd.to_datetime(df['Fecha Creación'], errors='coerce')
     df['Fecha Fin Atención'] = pd.to_datetime(df['Fecha Fin Atención'], errors='coerce')
+    for _dt_col in ['Fecha Asignación', 'Fecha Inicio Atención', 'Fecha Cierre', 'Vencimiento (SLA)', 'Fecha Llegada']:
+        if _dt_col in df.columns:
+            df[_dt_col] = pd.to_datetime(df[_dt_col], errors='coerce')
     
     # Rellenar vacíos de forma segura
     df['Barrio'] = df['Barrio'].fillna('SIN BARRIO').astype(str).str.strip().replace('', 'SIN BARRIO')
@@ -374,7 +420,116 @@ def generate_report_from_df(df, template_path=None):
     TOTAL_ORDENES = len(df)
     if TOTAL_ORDENES == 0:
         TOTAL_ORDENES = 1
-    
+
+    # --- ANÁLISIS DE LAS NUEVAS COLUMNAS DEL FORMATO ---
+    def _text_col(col):
+        if col not in df.columns:
+            return pd.Series([''] * len(df), index=df.index, dtype=object)
+        return df[col].fillna('').astype(str).str.strip()
+
+    EMPTY_VALUES = ['', 'nan', 'none', 'n/a', 'na', 'sin dato', 'sin datos', 'no aplica', 'null', '-']
+
+    def _is_filled(series):
+        return ~series.str.lower().isin(EMPTY_VALUES)
+
+    # SLA: cierre real vs vencimiento prometido
+    df['_Fecha_Cierre_Efectiva'] = df['Fecha Cierre'].where(
+        df['Fecha Cierre'].notna(), df['Fecha Fin Atención']
+    )
+    df['_SLA_Evaluada'] = df['Vencimiento (SLA)'].notna() & df['_Fecha_Cierre_Efectiva'].notna()
+    df['_SLA_OK'] = df['_SLA_Evaluada'] & (df['_Fecha_Cierre_Efectiva'] <= df['Vencimiento (SLA)'])
+
+    sla_evaluadas = int(df['_SLA_Evaluada'].sum())
+    sla_cumplidas = int(df['_SLA_OK'].sum())
+    sla_incumplidas = sla_evaluadas - sla_cumplidas
+    sla_pct = (sla_cumplidas / sla_evaluadas * 100) if sla_evaluadas > 0 else 0
+    sla_vencidas_abiertas = int((
+        df['Vencimiento (SLA)'].notna()
+        & df['_Fecha_Cierre_Efectiva'].isna()
+        & (df['Vencimiento (SLA)'] < pd.Timestamp.now())
+    ).sum())
+    sla_sin_dato = int(df['Vencimiento (SLA)'].isna().sum())
+    sla_pct_display = f"{sla_pct:.2f}%" if sla_evaluadas > 0 else "—"
+
+    # Origen de la orden: enlace (automático) vs manual
+    origen_txt = _text_col('Origen (Enlace/Manual)').str.lower()
+    origen_valido = _is_filled(origen_txt)
+    origen_enlace = int((origen_valido & origen_txt.str.contains('enlace')).sum())
+    origen_manual = int((origen_valido & origen_txt.str.contains('manual')).sum())
+    origen_total = origen_enlace + origen_manual
+    pct_origen_enlace = (origen_enlace / origen_total * 100) if origen_total > 0 else 0
+    pct_origen_enlace_display = f"{pct_origen_enlace:.2f}%" if origen_total > 0 else "—"
+
+    # Aplicado en enlace
+    aplicado_txt = _text_col('Aplicado en Enlace').str.lower()
+    aplicado_count = int(aplicado_txt.isin(['si', 'sí', 's', 'yes', '1', 'true', 'x']).sum())
+    pct_aplicado_enlace = (aplicado_count / TOTAL_ORDENES * 100)
+
+    # Medio de solicitud (canal de ingreso)
+    canal_txt = _text_col('Medio Solicitud')
+    canal_norm = canal_txt.where(_is_filled(canal_txt), 'Sin registrar')
+    canal_counts = canal_norm.value_counts()
+    canal_top = canal_counts.index[0] if len(canal_counts) > 0 else 'Sin dato'
+    canal_top_count = int(canal_counts.iloc[0]) if len(canal_counts) > 0 else 0
+    canal_top_pct = (canal_top_count / TOTAL_ORDENES * 100)
+
+    # Prioridad
+    prio_txt = _text_col('Prioridad')
+
+    def _prio_label(val):
+        val = str(val).strip()
+        if val.lower() in ['', 'nan', 'sin dato', 'sin prioridad', '0', '0.0']:
+            return 'Sin prioridad'
+        try:
+            num = int(float(val))
+        except (TypeError, ValueError):
+            return val
+        return f'Prioridad {num}'
+
+    prio_norm = prio_txt.map(_prio_label)
+    prio_counts = prio_norm.value_counts().sort_index()
+    prioridad_alta = int((prio_norm == 'Prioridad 1').sum())
+    prioridad_alta_pct = (prioridad_alta / TOTAL_ORDENES * 100)
+
+    # Evidencia fotográfica
+    fotos_txt = _text_col('Ubicación Fotos').str.lower()
+    con_fotos = int((fotos_txt.ne('') & ~fotos_txt.str.contains('sin foto') & fotos_txt.ne('nan')).sum())
+    pct_con_fotos = (con_fotos / TOTAL_ORDENES * 100)
+
+    # Registro de equipos (MAC)
+    mac_router = _text_col('MAC Router')
+    mac_bridge = _text_col('MAC Bridge')
+    mac_ont = _text_col('MAC ONT')
+    otros_equipos = _text_col('Otros Equipos')
+    ont_reg = int(_is_filled(mac_ont).sum())
+    router_reg = int(_is_filled(mac_router).sum())
+    bridge_reg = int(_is_filled(mac_bridge).sum())
+    pct_ont_reg = (ont_reg / TOTAL_ORDENES * 100)
+    pct_router_reg = (router_reg / TOTAL_ORDENES * 100)
+    pct_bridge_reg = (bridge_reg / TOTAL_ORDENES * 100)
+    otros_equipos_counts = otros_equipos[_is_filled(otros_equipos)].value_counts()
+
+    # Novedades NOC y observaciones
+    noc_txt = _text_col('Novedades NOC')
+    noc_count = int(_is_filled(noc_txt).sum())
+    pct_noc = (noc_count / TOTAL_ORDENES * 100)
+
+    # Tiempo de llegada (asignación -> llegada al sitio)
+    if 'Fecha Llegada' in df.columns and 'Fecha Asignación' in df.columns:
+        _llegada_h = (df['Fecha Llegada'] - df['Fecha Asignación']).dt.total_seconds() / 3600
+        _llegada_valida = _llegada_h[_llegada_h > 0]
+        tiempo_llegada_prom = _llegada_valida.mean() if len(_llegada_valida) > 0 else 0
+        ordenes_con_llegada = int(len(_llegada_valida))
+    else:
+        tiempo_llegada_prom = 0
+        ordenes_con_llegada = 0
+
+    # Sede, plan, tipo de servicio y vendedor
+    sede_counts = _text_col('Sede').where(_is_filled(_text_col('Sede')), 'Sin registrar').value_counts()
+    plan_counts = _text_col('Plan Internet').where(_is_filled(_text_col('Plan Internet')), 'Sin dato').value_counts()
+    servicio_counts = _text_col('Tipo de Servicio').where(_is_filled(_text_col('Tipo de Servicio')), 'Sin dato').value_counts()
+    vendedor_counts = _text_col('Vendedor').where(_is_filled(_text_col('Vendedor')), 'Sin registrar').value_counts()
+
     # --- MÉTRICAS ADICIONALES (SOLICITADAS) ---
     
     # 1. Órdenes Pendientes
@@ -651,6 +806,7 @@ def generate_report_from_df(df, template_path=None):
     # 12. equipos_cambios_bar.png
     fig, ax = plt.subplots(figsize=(10, 6))
     eq_categories = {
+        'Cambio de Equipo\n(Cód. 3)': df['Solución Técnico'].astype(str).str.contains(r'3 CAMBIO DE EQUIPO|cambio de equipo', case=False, na=False).sum(),
         'Equipo Defectuoso\n(Cód. 7)': df['Solución Técnico'].astype(str).str.contains('7 CAMBIO -EQUIPO DEFECTUOSO|equipo defectuoso', case=False, na=False).sum(),
         'Cambio de Bridge/Router\n(Cód. 24)': df['Solución Técnico'].astype(str).str.contains('24 CAMBIO DE BRIDGE|cambio de bridge', case=False, na=False).sum(),
         'Equipo Quemado\n(Cód. 8)': df['Solución Técnico'].astype(str).str.contains('8 CAMBIO -EQUIPO QUEMADO|equipo quemado', case=False, na=False).sum(),
@@ -659,13 +815,84 @@ def generate_report_from_df(df, template_path=None):
     eq_categories = {k: v for k, v in eq_categories.items() if v > 0}
     eq_categories = dict(sorted(eq_categories.items(), key=lambda item: item[1], reverse=True))
     
-    bar_colors = [COLORS_DICT['primary'], COLORS_DICT['secondary'], COLORS_DICT['accent2'], COLORS_DICT['accent1']]
+    bar_colors = [COLORS_DICT['primary'], COLORS_DICT['secondary'], COLORS_DICT['accent2'], COLORS_DICT['accent3'], COLORS_DICT['accent1']]
     bars = ax.bar(eq_categories.keys(), eq_categories.values(), color=bar_colors[:len(eq_categories)])
     ax.bar_label(bars, padding=3, fontsize=10)
     ax.set_title('Distribución de Cambios de Equipo por Tipo', fontsize=14, fontweight='bold', pad=20)
     plt.xticks(fontsize=9)
     plt.tight_layout()
     charts['equipos_cambios_bar.png'] = fig_to_base64(fig)
+    plt.close()
+
+    # 13. origen_pie.png (Enlace vs Manual - NUEVO FORMATO)
+    if origen_total > 0:
+        fig, ax = plt.subplots(figsize=(7, 5))
+        origen_vals = [origen_enlace, origen_manual]
+        origen_labels = [f'Enlace ({origen_enlace})', f'Manual ({origen_manual})']
+        ax.pie(origen_vals, labels=origen_labels, autopct='%1.1f%%',
+               colors=[COLORS_DICT['secondary'], COLORS_DICT['primary']], startangle=90)
+        ax.set_title('Origen de las Ordenes', fontsize=14, fontweight='bold')
+        plt.tight_layout()
+    else:
+        fig, ax = plt.subplots(figsize=(7, 5))
+        ax.text(0.5, 0.5, 'Sin informacion de origen', ha='center', va='center', fontsize=12)
+        ax.axis('off')
+        ax.set_title('Origen de las Ordenes', fontsize=14, fontweight='bold')
+    charts['origen_pie.png'] = fig_to_base64(fig)
+    plt.close()
+
+    # 14. canal_solicitud_bar.png (Medio de solicitud)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    canal_top10 = canal_counts.head(10)
+    bars = ax.barh(canal_top10.index[::-1], canal_top10.values[::-1], color=COLORS_DICT['secondary'])
+    ax.bar_label(bars, padding=3, fontsize=9)
+    ax.set_title('Ordenes por Medio de Solicitud', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    charts['canal_solicitud_bar.png'] = fig_to_base64(fig)
+    plt.close()
+
+    # 15. sla_tecnico_bar.png (Cumplimiento de SLA por tecnico)
+    sla_tech = df[df['_SLA_Evaluada']].groupby('Técnico Principal').agg(
+        Cumplidas=('_SLA_OK', 'sum'), Evaluadas=('_SLA_OK', 'count')
+    )
+    sla_tech = sla_tech[sla_tech['Evaluadas'] >= 3]
+    if len(sla_tech) > 0:
+        sla_tech['Pct'] = sla_tech['Cumplidas'] / sla_tech['Evaluadas'] * 100
+        sla_tech = sla_tech.sort_values('Pct')
+        fig, ax = plt.subplots(figsize=(11, 6))
+        colors_sla = [COLORS_DICT['accent1'] if v < 80 else COLORS_DICT['accent3'] for v in sla_tech['Pct']]
+        bars = ax.barh(sla_tech.index, sla_tech['Pct'], color=colors_sla)
+        ax.bar_label(bars, fmt='%.1f%%', padding=3, fontsize=9)
+        ax.axvline(80, color='#999', linestyle='--', linewidth=1)
+        ax.set_xlim(0, 110)
+        ax.set_title('Cumplimiento de SLA por Tecnico (%)', fontsize=14, fontweight='bold')
+        plt.tight_layout()
+    else:
+        fig, ax = plt.subplots(figsize=(11, 6))
+        ax.text(0.5, 0.5, 'Sin datos suficientes de SLA', ha='center', va='center', fontsize=12)
+        ax.axis('off')
+        ax.set_title('Cumplimiento de SLA por Tecnico', fontsize=14, fontweight='bold')
+    charts['sla_tecnico_bar.png'] = fig_to_base64(fig)
+    plt.close()
+
+    # 16. prioridad_bar.png
+    fig, ax = plt.subplots(figsize=(9, 5))
+    bars = ax.bar(prio_counts.index, prio_counts.values, color=COLORS_DICT['accent2'])
+    ax.bar_label(bars, padding=3, fontsize=10)
+    ax.set_title('Ordenes por Prioridad', fontsize=14, fontweight='bold')
+    plt.xticks(rotation=20, ha='right')
+    plt.tight_layout()
+    charts['prioridad_bar.png'] = fig_to_base64(fig)
+    plt.close()
+
+    # 17. plan_internet_bar.png (Top 10 planes)
+    fig, ax = plt.subplots(figsize=(11, 6))
+    plan_top10 = plan_counts.head(10)
+    bars = ax.barh(plan_top10.index[::-1], plan_top10.values[::-1], color=COLORS_DICT['accent4'])
+    ax.bar_label(bars, padding=3, fontsize=9)
+    ax.set_title('Top 10 Planes de Internet', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    charts['plan_internet_bar.png'] = fig_to_base64(fig)
     plt.close()
 
 
@@ -681,6 +908,15 @@ def generate_report_from_df(df, template_path=None):
     kpi_body += format_html_table_row(["Pendientes", f"<strong>{ordenes_pendientes}</strong>", f"Órdenes en estado 'Pendiente'"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Backlog Total", f"<strong>{ordenes_backlog}</strong>", f"Órdenes no cerradas ni ejecutadas"], aligns=["", "text-center", "text-left"])
     kpi_body += format_html_table_row(["Índice de Reincidencia", f"<strong>{tasa_reincidencia:.2f}%</strong>", f"{reincidencias} casos de reincidencia (<15 días)"], aligns=["", "text-center", "text-left"])
+    # KPIs nuevos (columnas del formato actualizado)
+    kpi_body += format_html_table_row(["Cumplimiento de SLA", f"<strong>{sla_pct_display}</strong>", f"{sla_cumplidas} de {sla_evaluadas} órdenes cerradas dentro del vencimiento (SLA). {sla_incumplidas} fuera de SLA y {sla_vencidas_abiertas} vencidas sin cerrar"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Origen de la Orden", f"<strong>{pct_origen_enlace_display}</strong>", f"{origen_enlace} órdenes por enlace vs {origen_manual} manuales; {aplicado_count} aplicadas en enlace ({pct_aplicado_enlace:.2f}%)"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Canal Principal", f"<strong>{canal_top}</strong>", f"{canal_top_count} órdenes ({canal_top_pct:.2f}%) ingresadas por este medio"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Prioridad 1", f"<strong>{prioridad_alta}</strong>", f"{prioridad_alta_pct:.2f}% de las órdenes marcadas con la prioridad más alta"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Evidencia Fotográfica", f"<strong>{pct_con_fotos:.2f}%</strong>", f"{con_fotos} de {TOTAL_ORDENES} órdenes con fotografías registradas"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Equipos Registrados (MAC)", f"<strong>{pct_ont_reg:.2f}%</strong>", f"ONT: {ont_reg}, Router: {router_reg}, Bridge: {bridge_reg} órdenes con identificación del equipo"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Novedades NOC", f"<strong>{noc_count}</strong>", f"{pct_noc:.2f}% de las órdenes tienen novedades registradas por el NOC"], aligns=["", "text-center", "text-left"])
+    kpi_body += format_html_table_row(["Tiempo de Llegada", f"<strong>{tiempo_llegada_prom:.2f} hrs</strong>", f"Promedio entre asignación y llegada al sitio ({ordenes_con_llegada} órdenes con registro)"], aligns=["", "text-center", "text-left"])
     
     # Barrios Top 20
     barrios_body = ""
@@ -854,13 +1090,14 @@ def generate_report_from_df(df, template_path=None):
 
     # --- ANÁLISIS DE CAMBIOS DE EQUIPOS ---
     df['Es_Cambio_Equipo'] = df['Solución Técnico'].astype(str).str.contains(
-        r'7 CAMBIO -EQUIPO DEFECTUOSO|24 CAMBIO DE BRIDGE|8 CAMBIO -EQUIPO QUEMADO|9 CAMBIO- EQUIPO|25 CAMBIO DE CAMARA|cambio de bridge|equipo defectuoso|equipo quemado|cambio de camara',
+        r'7 CAMBIO -EQUIPO DEFECTUOSO|24 CAMBIO DE BRIDGE|8 CAMBIO -EQUIPO QUEMADO|9 CAMBIO- EQUIPO|25 CAMBIO DE CAMARA|cambio de equipo|cambio de bridge|equipo defectuoso|equipo quemado|cambio de camara',
         case=False, na=False
     )
     
     total_eq_orders = df['Es_Cambio_Equipo'].sum()
     pct_total_eq = (total_eq_orders / TOTAL_ORDENES * 100) if TOTAL_ORDENES > 0 else 0
     
+    equipos_cod3_count = df['Solución Técnico'].astype(str).str.contains(r'3 CAMBIO DE EQUIPO|cambio de equipo', case=False, na=False).sum()
     equipos_defectuosos_count = df['Solución Técnico'].astype(str).str.contains('7 CAMBIO -EQUIPO DEFECTUOSO|equipo defectuoso', case=False, na=False).sum()
     equipos_bridge_count = df['Solución Técnico'].astype(str).str.contains('24 CAMBIO DE BRIDGE|cambio de bridge', case=False, na=False).sum()
     equipos_quemados_count = df['Solución Técnico'].astype(str).str.contains('8 CAMBIO -EQUIPO QUEMADO|equipo quemado', case=False, na=False).sum()
@@ -895,6 +1132,105 @@ def generate_report_from_df(df, template_path=None):
         f"{pct_total_eq:.2f}%"
     ], is_total=True)
 
+    # --- TABLAS DEL FORMATO ACTUALIZADO ---
+    def _sla_pct_txt(evaluadas, cumplidas):
+        return f"{(cumplidas / evaluadas * 100):.2f}%" if evaluadas > 0 else "—"
+
+    # Canales de ingreso y su cumplimiento de SLA
+    tabla_canales_body = ""
+    for canal, count in canal_counts.items():
+        mask = canal_norm == canal
+        ev = int(df.loc[mask, '_SLA_Evaluada'].sum())
+        ok = int(df.loc[mask, '_SLA_OK'].sum())
+        tabla_canales_body += format_html_table_row([canal, count, f"{(count/TOTAL_ORDENES*100):.2f}%", _sla_pct_txt(ev, ok)])
+    tabla_canales_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "100.00%", _sla_pct_txt(sla_evaluadas, sla_cumplidas)], is_total=True)
+
+    # Origen de la orden
+    pct_origen_manual = (origen_manual / origen_total * 100) if origen_total > 0 else 0
+    if origen_total > 0:
+        tabla_origen_body = format_html_table_row(["Enlace (generada en el enlace)", origen_enlace, f"{pct_origen_enlace:.2f}%"])
+        tabla_origen_body += format_html_table_row(["Manual / Directa", origen_manual, f"{pct_origen_manual:.2f}%"])
+        tabla_origen_body += format_html_table_row(["<strong>TOTAL</strong>", origen_total, "100.00%"], is_total=True)
+    else:
+        tabla_origen_body = '<tr><td colspan="3" class="text-center">Este archivo no incluye la columna de origen de la orden.</td></tr>'
+
+    # Prioridad
+    tabla_prioridad_body = ""
+    for prio, count in prio_counts.items():
+        tabla_prioridad_body += format_html_table_row([prio, count, f"{(count/TOTAL_ORDENES*100):.2f}%"])
+    tabla_prioridad_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "100.00%"], is_total=True)
+
+    # SLA por técnico
+    tabla_sla_tecnico_body = ""
+    if len(sla_tech) > 0:
+        for name, row in sla_tech.sort_values('Pct', ascending=False).iterrows():
+            pct_tech = row['Pct']
+            badge_class = "badge-success" if pct_tech >= 80 else ("badge-warning" if pct_tech >= 50 else "badge-danger")
+            tabla_sla_tecnico_body += format_html_table_row([
+                f"<strong>{name}</strong>",
+                int(row['Evaluadas']),
+                int(row['Cumplidas']),
+                int(row['Evaluadas'] - row['Cumplidas']),
+                f'<span class="badge {badge_class}">{pct_tech:.2f}%</span>'
+            ])
+        tabla_sla_tecnico_body += format_html_table_row([
+            "<strong>TOTAL GENERAL</strong>", sla_evaluadas, sla_cumplidas, sla_incumplidas, f"{sla_pct:.2f}%"
+        ], is_total=True)
+    else:
+        tabla_sla_tecnico_body = '<tr><td colspan="5" class="text-center">No hay datos de vencimiento (SLA) suficientes para evaluar.</td></tr>'
+
+    # Planes de Internet
+    tabla_planes_body = ""
+    for plan, count in plan_counts.head(15).items():
+        tabla_planes_body += format_html_table_row([plan, count, f"{(count/TOTAL_ORDENES*100):.2f}%"])
+    tabla_planes_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "100.00%"], is_total=True)
+
+    # Tipo de servicio
+    tabla_servicio_body = ""
+    for serv, count in servicio_counts.items():
+        tabla_servicio_body += format_html_table_row([serv, count, f"{(count/TOTAL_ORDENES*100):.2f}%"])
+    tabla_servicio_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "100.00%"], is_total=True)
+
+    # Sedes
+    tabla_sede_body = ""
+    for sede, count in sede_counts.items():
+        tabla_sede_body += format_html_table_row([sede, count, f"{(count/TOTAL_ORDENES*100):.2f}%"])
+    tabla_sede_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", TOTAL_ORDENES, "100.00%"], is_total=True)
+
+    # Vendedores
+    tabla_vendedores_body = ""
+    for i, (vend, count) in enumerate(vendedor_counts.head(15).items(), 1):
+        tabla_vendedores_body += format_html_table_row([i, f"<strong>{vend}</strong>", count, f"{(count/TOTAL_ORDENES*100):.2f}%"])
+    tabla_vendedores_body += format_html_table_row(["<strong>TOTAL GENERAL</strong>", "", sum(vendedor_counts.head(15).values), f"{(sum(vendedor_counts.head(15).values)/TOTAL_ORDENES*100):.2f}%"], is_total=True)
+
+    # Registro de equipos por MAC
+    tabla_equipos_registro_body = ""
+    for equipo, reg, pct_reg in [('ONT', ont_reg, pct_ont_reg), ('Router', router_reg, pct_router_reg), ('Bridge', bridge_reg, pct_bridge_reg)]:
+        badge_class = "badge-success" if pct_reg >= 80 else ("badge-warning" if pct_reg >= 50 else "badge-danger")
+        tabla_equipos_registro_body += format_html_table_row([
+            equipo, reg, TOTAL_ORDENES - reg, f'<span class="badge {badge_class}">{pct_reg:.2f}%</span>'
+        ])
+
+    # Novedades NOC más frecuentes
+    tabla_novedades_body = ""
+    novedades_top = noc_txt[_is_filled(noc_txt)].value_counts().head(10)
+    if len(novedades_top) > 0:
+        for nota, count in novedades_top.items():
+            nota_corta = (nota[:110] + '…') if len(nota) > 110 else nota
+            tabla_novedades_body += format_html_table_row([nota_corta, count])
+    else:
+        tabla_novedades_body = '<tr><td colspan="2" class="text-center">No se registraron novedades del NOC en el período.</td></tr>'
+
+    # Otros equipos
+    otros_top = otros_equipos_counts.head(10)
+    tabla_otros_equipos_body = ""
+    if len(otros_top) > 0:
+        for eq, count in otros_top.items():
+            eq_corta = (eq[:80] + '…') if len(eq) > 80 else eq
+            tabla_otros_equipos_body += format_html_table_row([eq_corta, count])
+    else:
+        tabla_otros_equipos_body = '<tr><td colspan="2" class="text-center">Sin otros equipos registrados.</td></tr>'
+
     # --- ENSAMBLAJE ---
     with open(template_path, 'r', encoding='utf-8') as f:
         html = f.read()
@@ -917,6 +1253,17 @@ def generate_report_from_df(df, template_path=None):
     """
 
     hallazgo_principal = f"Se logró una tasa de resolución del {tasa_resolucion:.2f}% (con {ordenes_anuladas} órdenes anuladas y {ordenes_pendientes} órdenes pendientes)."
+
+    hallazgos_gestion = (
+        f"• <strong>Cumplimiento de SLA:</strong> {sla_pct:.2f}% de las {sla_evaluadas} órdenes evaluadas se cerraron dentro del vencimiento; "
+        f"{sla_incumplidas} quedaron fuera de SLA y {sla_vencidas_abiertas} están vencidas sin cerrar.<br>"
+        f"• <strong>Canal de ingreso:</strong> «{canal_top}» concentra {canal_top_pct:.2f}% de las órdenes; "
+        f"el {pct_origen_enlace:.2f}% se originó en el enlace y {aplicado_count} órdenes ({pct_aplicado_enlace:.2f}%) quedaron aplicadas en enlace.<br>"
+        f"• <strong>Control de equipos:</strong> se registró MAC de ONT en {pct_ont_reg:.2f}% de las órdenes "
+        f"({ont_reg} de {TOTAL_ORDENES}); router {pct_router_reg:.2f}% y bridge {pct_bridge_reg:.2f}%.<br>"
+        f"• <strong>Evidencias y NOC:</strong> {con_fotos} órdenes ({pct_con_fotos:.2f}%) tienen fotografías y {noc_count} "
+        f"({pct_noc:.2f}%) registran novedades del NOC. Tiempo promedio de llegada al sitio: {tiempo_llegada_prom:.2f} horas."
+    )
 
     # Extraer periodo dinámicamente
     import calendar
@@ -941,6 +1288,7 @@ def generate_report_from_df(df, template_path=None):
     replacements = {
         '{{ EQUIPOS_CAMBIOS_COUNT }}': str(total_eq_orders),
         '{{ PORCENTAJE_CAMBIOS_EQUIPOS }}': f"{pct_total_eq:.2f}",
+        '{{ EQUIPOS_COD3_COUNT }}': str(equipos_cod3_count),
         '{{ EQUIPOS_DEFECTUOSOS_COUNT }}': str(equipos_defectuosos_count),
         '{{ EQUIPOS_QUEMADOS_COUNT }}': str(equipos_quemados_count),
         '{{ EQUIPOS_BRIDGE_COUNT }}': str(equipos_bridge_count),
@@ -993,7 +1341,40 @@ def generate_report_from_df(df, template_path=None):
         '{{ CLASIFICACION_GENERAL }}': f"El departamento demuestra un nivel de desempeño sólido con tasa de resolución del {tasa_resolucion:.2f}% (considerando {ordenes_anuladas} órdenes anuladas).",
         '{{ FOOTER_EMPRESA }}': "Corporación Regional de Telecomunicaciones - Kaled Molina",
         '{{ COMPARATIVA_HEADERS }}': comparativa_headers,
-        '{{ TABLA_COMPARATIVA_BODY }}': tabla_comparativa_body
+        '{{ TABLA_COMPARATIVA_BODY }}': tabla_comparativa_body,
+        # Nuevas columnas del formato actualizado
+        '{{ SLA_CUMPLIMIENTO }}': sla_pct_display,
+        '{{ SLA_CUMPLIDAS }}': str(sla_cumplidas),
+        '{{ SLA_INCUMPLIDAS }}': str(sla_incumplidas),
+        '{{ SLA_EVALUADAS }}': str(sla_evaluadas),
+        '{{ SLA_VENCIDAS_ABIERTAS }}': str(sla_vencidas_abiertas),
+        '{{ ORIGEN_ENLACE_COUNT }}': str(origen_enlace),
+        '{{ ORIGEN_MANUAL_COUNT }}': str(origen_manual),
+        '{{ ORIGEN_ENLACE_PCT }}': pct_origen_enlace_display,
+        '{{ APLICADO_ENLACE_COUNT }}': str(aplicado_count),
+        '{{ APLICADO_ENLACE_PCT }}': f"{pct_aplicado_enlace:.2f}",
+        '{{ CANAL_TOP }}': canal_top,
+        '{{ CANAL_TOP_PCT }}': f"{canal_top_pct:.2f}",
+        '{{ PRIORIDAD_ALTA_COUNT }}': str(prioridad_alta),
+        '{{ PRIORIDAD_ALTA_PCT }}': f"{prioridad_alta_pct:.2f}",
+        '{{ ORDENES_CON_FOTOS }}': str(con_fotos),
+        '{{ PORCENTAJE_FOTOS }}': f"{pct_con_fotos:.2f}",
+        '{{ PORCENTAJE_ONT }}': f"{pct_ont_reg:.2f}",
+        '{{ NOVEDADES_NOC_COUNT }}': str(noc_count),
+        '{{ NOVEDADES_NOC_PCT }}': f"{pct_noc:.2f}",
+        '{{ TIEMPO_LLEGADA_PROM }}': f"{tiempo_llegada_prom:.2f}",
+        '{{ TABLA_CANALES_BODY }}': tabla_canales_body,
+        '{{ TABLA_ORIGEN_BODY }}': tabla_origen_body,
+        '{{ TABLA_PRIORIDAD_BODY }}': tabla_prioridad_body,
+        '{{ TABLA_SLA_TECNICO_BODY }}': tabla_sla_tecnico_body,
+        '{{ TABLA_PLANES_BODY }}': tabla_planes_body,
+        '{{ TABLA_SERVICIO_BODY }}': tabla_servicio_body,
+        '{{ TABLA_SEDE_BODY }}': tabla_sede_body,
+        '{{ TABLA_VENDEDORES_BODY }}': tabla_vendedores_body,
+        '{{ TABLA_EQUIPOS_REGISTRO_BODY }}': tabla_equipos_registro_body,
+        '{{ TABLA_NOVEDADES_BODY }}': tabla_novedades_body,
+        '{{ TABLA_OTROS_EQUIPOS_BODY }}': tabla_otros_equipos_body,
+        '{{ HALLAZGOS_GESTION }}': hallazgos_gestion
     }
 
 

@@ -116,6 +116,15 @@ El reporte está diseñado para ser **auto-contenido**. Todas las imágenes y gr
 *   **Tendencia Temporal:** Gráfico detallado de órdenes creadas vs. ejecutadas día por día.
 *   **Productividad Técnica:** Análisis de órdenes diarias promedio por técnico (normalizado por días activos).
 *   **Análisis de Tiempos:** Distribución de tiempos de respuesta y cumplimiento de SLAs (48h / 5 días).
+*   **Cambios de Equipos:** Órdenes que terminaron en cambio de equipo (código 3 del formato actual, y códigos 7, 8, 24 y 25 del formato anterior), con desglose por tipo y ranking de técnicos.
+
+---
+
+## 🗂️ Columnas del Excel soportadas
+
+El script detecta las columnas de forma tolerante a mayúsculas, tildes y nombres alternativos. Acepta tanto el
+formato anterior (34 columnas) como el reporte detallado actual (42 columnas) sin necesidad de recortar el archivo;
+las columnas adicionales que no se usan simplemente se ignoran.
 
 ---
 

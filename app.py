@@ -65,4 +65,4 @@ def download():
 if __name__ == '__main__':
     # Asegurarse de que las carpetas necesarias existen
     os.makedirs('templates', exist_ok=True)
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='127.0.0.1', port=5000)
